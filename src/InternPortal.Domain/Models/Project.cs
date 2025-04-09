@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace InternPortal.Domain.Models
+﻿namespace InternPortal.Domain.Models
 {
     public class Project
     {

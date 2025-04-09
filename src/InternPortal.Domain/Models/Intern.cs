@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace InternPortal.Domain.Models
+﻿namespace InternPortal.Domain.Models
 {
     public class Intern
     {
