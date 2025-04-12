@@ -3,7 +3,7 @@
 
 namespace InternPortal.Domain.Abstractions.Repositories
 {
-    public interface IProject: IRepository<Project>
+    public interface IProjectRepository: IRepository<Project>
     {
     }
 }

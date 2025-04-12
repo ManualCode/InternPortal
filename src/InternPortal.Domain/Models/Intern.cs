@@ -27,9 +27,9 @@
 
         public string Email { get; }
 
-        public string PhoneNumber { get;  }
+        public string PhoneNumber { get; }
 
-        public DateTime BirthDate { get;}
+        public DateTime BirthDate { get; }
 
         public Internship Internship { get; }
 
@@ -40,11 +40,11 @@
         public DateTime UpdatedAt { get; } = DateTime.UtcNow;
 
 
-        public static (Intern Intern, string Error) Create(Guid id, string firstName, string lastName, Gender gender, string email, string phoneNumber,
+        public static (Intern Intern, string Error) Create(string firstName, string lastName, Gender gender, string email, string phoneNumber,
             DateTime birthDate, Internship internship, Project project, DateTime createdAt)
         {
             var error = string.Empty;
-            var intern = new Intern(id, firstName, lastName, gender, email, phoneNumber, birthDate, internship, project, createdAt);
+            var intern = new Intern(Guid.NewGuid(), firstName, lastName, gender, email, phoneNumber, birthDate, internship, project, createdAt);
 
             return (intern, error);
         }

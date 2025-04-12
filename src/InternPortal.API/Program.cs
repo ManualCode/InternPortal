@@ -1,4 +1,8 @@
+using InternPortal.Application.Abstractions.Services;
+using InternPortal.Application.Services;
+using InternPortal.Domain.Abstractions.Repositories;
 using InternPortal.Infrastructure.Data;
+using InternPortal.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +17,14 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<InternPortalDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("InternPortal")));
+
+builder.Services.AddScoped<IInternService, InternService>();
+builder.Services.AddScoped<IInternshipService, InternshipService>();
+builder.Services.AddScoped<IInternRepository, InternRepository>();
+builder.Services.AddScoped<IInternshipRepository, InternshipRepository>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 

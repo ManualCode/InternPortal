@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\InternPortal.Domain\InternPortal.Domain.csproj" />
-    <ProjectReference Include="..\InternPortal.Infrastructure\InternPortal.Infrastructure.csproj" />
+    <Folder Include="Contracts\Internship\Requests\" />
+    <Folder Include="Contracts\Project\Requests\" />
   </ItemGroup>
 
 </Project>

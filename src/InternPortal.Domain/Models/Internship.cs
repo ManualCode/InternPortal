@@ -14,8 +14,6 @@
 
         public string Name { get; }
 
-        public DateTime BirthDate { get; }
-
         public ICollection<Intern> Interns { get; }
 
         public DateTime CreatedAt { get; }
@@ -26,6 +24,7 @@
         public static (Internship Internship, string Error) Create(Guid id, string name, ICollection<Intern> interns, DateTime createdAt)
         {
             var error = string.Empty;
+            interns ??= [];
             var internship = new Internship(id, name, interns, createdAt);
 
             return new(internship, error);

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InternPortal.Infrastructure.Migrations
 {
     [DbContext(typeof(InternPortalDbContext))]
-    [Migration("20250409194705_ids")]
+    [Migration("20250411143603_ids")]
     partial class ids
     {
         /// <inheritdoc />
@@ -79,9 +79,6 @@ namespace InternPortal.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

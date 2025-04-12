@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InternPortal.Infrastructure.Data
 {
-    public class InternPortalDbContext: DbContext
+    public class InternPortalDbContext : DbContext
     {
-        public InternPortalDbContext(DbContextOptions<InternPortalDbContext> options): base(options)
+        public InternPortalDbContext(DbContextOptions<InternPortalDbContext> options) : base(options)
         {
-            
+
         }
 
         public DbSet<InternEntity> Interns { get; set; }
