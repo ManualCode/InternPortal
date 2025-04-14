@@ -20,6 +20,7 @@ builder.Services.AddDbContext<InternPortalDbContext>(options =>
 
 builder.Services.AddScoped<IInternService, InternService>();
 builder.Services.AddScoped<IInternshipService, InternshipService>();
+builder.Services.AddScoped<IProjectSevice, ProjectService>();
 builder.Services.AddScoped<IInternRepository, InternRepository>();
 builder.Services.AddScoped<IInternshipRepository, InternshipRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();

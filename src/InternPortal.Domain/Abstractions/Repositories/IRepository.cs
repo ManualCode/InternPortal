@@ -1,8 +1,11 @@
-﻿namespace InternPortal.Domain.Abstractions.Repositories
+﻿using InternPortal.Domain.Filters;
+using InternPortal.Domain.Sort;
+
+namespace InternPortal.Domain.Abstractions.Repositories
 {
     public interface IRepository<T>
     {
-        Task<List<T>> GetAllAsync();
+        Task<List<T>> GetAllAsync(InternshipFilter filter, SortParams sort);
         Task<Guid> AddAsync(T entity);
         Task<T?> GetByIdAsync(Guid id);
 

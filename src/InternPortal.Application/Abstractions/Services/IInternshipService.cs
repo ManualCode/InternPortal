@@ -1,14 +1,14 @@
-﻿using InternPortal.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using InternPortal.Domain.Filters;
+using InternPortal.Domain.Models;
+using InternPortal.Domain.Sort;
+
 
 namespace InternPortal.Application.Abstractions.Services
 {
     public interface IInternshipService
     {
-        Task<List<Internship>> GetAllInternships();
+        Task<List<Internship>> GetAllInternships(InternshipFilter filter, SortParams sort);
+
+        Task<Internship> FindOrCreate(Internship internship);
     }
 }

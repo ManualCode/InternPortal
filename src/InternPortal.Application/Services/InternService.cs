@@ -28,7 +28,7 @@ namespace InternPortal.Application.Services
 
         public async Task<List<Intern>> GetAllInterns()
         {
-            var interns = await internRepository.GetAllAsync();
+            var interns = await internRepository.GetAllAsync(null, null);
 
             return interns;
         }

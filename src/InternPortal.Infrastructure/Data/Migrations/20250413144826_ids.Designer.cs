@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InternPortal.Infrastructure.Migrations
 {
     [DbContext(typeof(InternPortalDbContext))]
-    [Migration("20250411143603_ids")]
+    [Migration("20250413144826_ids")]
     partial class ids
     {
         /// <inheritdoc />
@@ -56,7 +56,6 @@ namespace InternPortal.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("ProjectId")

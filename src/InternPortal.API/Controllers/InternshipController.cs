@@ -3,6 +3,8 @@ using InternPortal.Shared.Contracts.Intern.Responses;
 using Microsoft.AspNetCore.Mvc;
 using InternPortal.Shared.Contracts.Internship.Responses;
 using InternPortal.Shared.Contracts.Project.Responses;
+using InternPortal.Domain.Filters;
+using InternPortal.Domain.Sort;
 
 namespace InternPortal.API.Controllers
 {
@@ -18,9 +20,9 @@ namespace InternPortal.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<InternResponse>>> GetInternships()
+        public async Task<ActionResult<List<InternResponse>>> GetInternships([FromQuery] InternshipFilter filter, [FromQuery] SortParams sort) 
         {
-            var internships = await internshipService.GetAllInternships();
+            var internships = await internshipService.GetAllInternships(filter, sort);
 
             var responses = internships.Select(i => new InternshipResponse(i.Id, i.Name,
                 i.Interns.Select(x => 

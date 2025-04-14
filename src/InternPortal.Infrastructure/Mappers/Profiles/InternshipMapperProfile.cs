@@ -11,7 +11,7 @@ namespace InternPortal.Infrastructure.Mappers.Profiles
         {
             CreateMap<InternshipEntity, Internship>()
                  .ConstructUsing((InternshipEntity ie) => Internship.Create(ie.Id, ie.Name,
-                ie.Interns.Select(x => Intern.Create(x.FirstName, x.LastName, (Gender)x.Gender, x.Email, x.PhoneNumber, x.BirthDate, null, null, x.CreatedAt).Intern).ToList(),
+                ie.Interns.Select(x => Intern.Create(x.FirstName, x.LastName, (Gender)x.Gender, x.Email, x.PhoneNumber, x.BirthDate, null, null, x.CreatedAt)).ToList(),
                 ie.CreatedAt).Internship)
                  .PreserveReferences();
 

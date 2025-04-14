@@ -18,6 +18,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\InternPortal.Domain\InternPortal.Domain.csproj" />
+		<ProjectReference Include="..\InternPortal.Shared\InternPortal.Shared.csproj" />
 	</ItemGroup>
 
 </Project>

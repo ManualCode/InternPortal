@@ -3,7 +3,8 @@
 
 namespace InternPortal.Domain.Abstractions.Repositories
 {
-    public interface IInternshipRepository: IRepository<Internship>
+    public interface IInternshipRepository : IRepository<Internship>
     {
+        Task<Internship> FindOrCreateAsync(Internship internship);
     }
 }

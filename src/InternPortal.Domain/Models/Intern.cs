@@ -1,4 +1,7 @@
-﻿namespace InternPortal.Domain.Models
+﻿using System.Net.Mail;
+using System.Text.RegularExpressions;
+
+namespace InternPortal.Domain.Models
 {
     public class Intern
     {
@@ -40,13 +43,18 @@
         public DateTime UpdatedAt { get; } = DateTime.UtcNow;
 
 
-        public static (Intern Intern, string Error) Create(string firstName, string lastName, Gender gender, string email, string phoneNumber,
+        public static Intern Create(string firstName, string lastName, Gender gender, string email, string phoneNumber,
             DateTime birthDate, Internship internship, Project project, DateTime createdAt)
         {
-            var error = string.Empty;
-            var intern = new Intern(Guid.NewGuid(), firstName, lastName, gender, email, phoneNumber, birthDate, internship, project, createdAt);
+            MailAddress? _mail;
 
-            return (intern, error);
+            if (string.IsNullOrWhiteSpace(email) && !MailAddress.TryCreate(email, out _mail))
+                throw new Exception("Неккоректный адрес");
+
+            if (!string.IsNullOrWhiteSpace(phoneNumber) && !Regex.IsMatch(phoneNumber, @"^(\+7\d{10})?$"))
+                throw new Exception("Некорректный номер телефона");
+
+            return new Intern(Guid.NewGuid(), firstName, lastName, gender, email, phoneNumber, birthDate, internship, project, createdAt);
         }
     }
 }
