@@ -12,33 +12,33 @@ using System.Threading.Tasks;
 
 namespace InternPortal.Infrastructure.Extensions
 {
-    public static class InternshipExtensions
+    public static class ProjectExtensions
     {
-        public static IQueryable<InternshipEntity> Page(this IQueryable<InternshipEntity> query, PageParams pageParams)
+        public static IQueryable<ProjectEntity> Page(this IQueryable<ProjectEntity> query, PageParams pageParams)
         {
             var page = pageParams.Page ?? 1;
             var pageSize = pageParams.PageSize ?? 10;
-            
-            var skip = (page -1 ) * pageSize;
+
+            var skip = (page - 1) * pageSize;
             return query.Skip(skip).Take(pageSize);
         }
 
-        public static IQueryable<InternshipEntity> Filter(this IQueryable<InternshipEntity> query, BaseFilter internshipFilter)
+        public static IQueryable<ProjectEntity> Filter(this IQueryable<ProjectEntity> query, BaseFilter ProjectFilter)
         {
-            if (internshipFilter is not null && !string.IsNullOrWhiteSpace(internshipFilter.Name))
-                query = query.Where(x => x.Name.ToLower() == internshipFilter.Name.ToLower());
+            if (ProjectFilter is not null && !string.IsNullOrWhiteSpace(ProjectFilter.Name))
+                query = query.Where(x => x.Name.ToLower() == ProjectFilter.Name.ToLower());
 
             return query;
         }
 
-        public static IQueryable<InternshipEntity> Sort(this IQueryable<InternshipEntity> query, SortParams sort)
+        public static IQueryable<ProjectEntity> Sort(this IQueryable<ProjectEntity> query, SortParams sort)
         {
             return sort.SortDirection == SortDirection.Descending
                 ? query.OrderByDescending(GetKeySelector(sort.OrderBy))
                 : query.OrderBy(GetKeySelector(sort.OrderBy));
         }
 
-        private static Expression<Func<InternshipEntity, object>> GetKeySelector(string orderBy)
+        private static Expression<Func<ProjectEntity, object>> GetKeySelector(string orderBy)
         {
             if (string.IsNullOrEmpty(orderBy))
                 return x => x.CreatedAt;

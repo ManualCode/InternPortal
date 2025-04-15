@@ -29,9 +29,12 @@ namespace InternPortal.Infrastructure.Repositories
 
 
         public async Task DeleteAsync(Guid id)
-            => await dbContext.Interns.Where(i => i.Id == id).ExecuteDeleteAsync();
+        {
+            await dbContext.Interns.Where(i => i.Id == id).ExecuteDeleteAsync();
+            await dbContext.SaveChangesAsync();
+        }
 
-        public async Task<List<Intern>> GetAllAsync(InternshipFilter filter, SortParams sort)
+        public async Task<List<Intern>> GetAllAsync()
         {
             var internEntities = await dbContext.Interns.AsNoTracking()
                 .Include(i => i.Internship).Include(i => i.Project).ToListAsync();
@@ -52,5 +55,11 @@ namespace InternPortal.Infrastructure.Repositories
         {
             throw new NotImplementedException();
         }
+
+        public async Task<bool> IsEmailUniqueAsync(string email)
+            => !await dbContext.Interns.AnyAsync(u => u.Email == email);
+
+        public async Task<bool> IsPhoneNumberUniqueAsync(string phoneNumber)
+            => !await dbContext.Interns.AnyAsync(u => u.PhoneNumber == phoneNumber);
     }
 }

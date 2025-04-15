@@ -9,7 +9,7 @@ namespace InternPortal.Domain.Sort
 {
     public class SortParams
     {
-        public string OrderBy { get; set; }
-        public SortDirection SortDirection { get; set; }
+        public string? OrderBy { get; set; }
+        public SortDirection? SortDirection { get; set; }
     }
 }

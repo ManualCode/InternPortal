@@ -1,40 +1,39 @@
 ﻿using InternPortal.Domain.Abstractions.Repositories;
+using InternPortal.Infrastructure.Extensions;
+using InternPortal.Infrastructure.Entities;
+using InternPortal.Infrastructure.Mappers;
+using InternPortal.Infrastructure.Data;
+using InternPortal.Domain.Pagination;
+using Microsoft.EntityFrameworkCore;
 using InternPortal.Domain.Filters;
 using InternPortal.Domain.Models;
 using InternPortal.Domain.Sort;
-using InternPortal.Infrastructure.Data;
-using InternPortal.Infrastructure.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace InternPortal.Infrastructure.Repositories
 {
-    public class ProjectRepository : IProjectRepository
+    public class ProjectRepository(InternPortalDbContext dbContext) : IProjectRepository
     {
-        private readonly InternPortalDbContext dbContext;
-
-        public ProjectRepository(InternPortalDbContext dbContext)
+        public async Task<Guid> AddAsync(Project entity)
         {
-            this.dbContext = dbContext;
+            await dbContext.Projects.AddAsync(Mapping.Mapper.Map<ProjectEntity>(entity));
+            await dbContext.SaveChangesAsync();
+
+            return entity.Id;
         }
 
-        public Task<Guid> AddAsync(Project entity)
+        public async Task DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
-        }
+            var project = dbContext.Projects
+                .Include(p => p.Interns)
+                .FirstOrDefault(p => p.Id == id)
+                ?? throw new Exception("Проект не найден");
+               
+            if (project.Interns?.Any() == true)
+                throw new Exception("Невозможно удалить проект: к нему привязаны стажёры");
 
-        public Task DeleteAsync(Project entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteAsync(Guid id)
-        {
-            throw new NotImplementedException();
+            await dbContext.Projects.Where(i => i.Id == id).ExecuteDeleteAsync();
+            await dbContext.SaveChangesAsync();
         }
 
         public async Task<Project> FindOrCreateAsync(Project project)
@@ -53,22 +52,38 @@ namespace InternPortal.Infrastructure.Repositories
                 dbContext.SaveChanges();
             }
 
-            return Project.Create(existingProject.Id, existingProject.Name, [], existingProject.CreatedAt).Project;
+            return Project.Create(existingProject.Name, [], existingProject.CreatedAt, existingProject.Id);
         }
 
-        public Task<List<Project>> GetAllAsync(InternshipFilter filter, SortParams sort)
+        public async Task<List<Project>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams page)
         {
-            throw new NotImplementedException();
+            var projectEntities = await dbContext.Projects
+                .AsNoTracking()
+                .Filter(filter)
+                .Include(i => i.Interns)
+                    .ThenInclude(x => x.Internship)
+                .Sort(sort)
+                .Page(page)
+                .ToListAsync();
+
+            return projectEntities.Select(Mapping.Mapper.Map<Project>).ToList();
         }
 
-        public Task<Project?> GetByIdAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<Project?> GetByIdAsync(Guid id)
+            => Mapping.Mapper.Map<Project>(
+                await dbContext.Projects.Include(i => i.Interns).ThenInclude(x => x.Internship)
+                    .FirstOrDefaultAsync(i => i.Id == id));
 
-        public Task<Guid> UpdateAsync(Guid id, Project entity)
+        public async Task<Guid> UpdateAsync(Guid id, Project entity)
         {
-            throw new NotImplementedException();
+            var projectEntity = await dbContext.Projects.FirstOrDefaultAsync(x => x.Id == id)
+                ?? throw new Exception("Такого проекта нету");
+
+            projectEntity.Name = entity.Name;
+
+            await dbContext.SaveChangesAsync();
+
+            return id;
         }
     }
 }

@@ -21,13 +21,7 @@
         public DateTime UpdatedAt { get; } = DateTime.UtcNow;
 
 
-        public static (Internship Internship, string Error) Create(Guid id, string name, ICollection<Intern> interns, DateTime createdAt)
-        {
-            var error = string.Empty;
-            interns ??= [];
-            var internship = new Internship(id, name, interns, createdAt);
-
-            return new(internship, error);
-        }
+        public static Internship Create(string name, ICollection<Intern> interns, DateTime createdAt, Guid? id = null)
+            => new Internship(id ?? Guid.NewGuid(), name, interns, createdAt);
     }
 }

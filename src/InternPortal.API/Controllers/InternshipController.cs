@@ -1,37 +1,45 @@
-﻿using InternPortal.Application.Abstractions.Services;
-using InternPortal.Shared.Contracts.Intern.Responses;
-using Microsoft.AspNetCore.Mvc;
-using InternPortal.Shared.Contracts.Internship.Responses;
-using InternPortal.Shared.Contracts.Project.Responses;
+﻿using InternPortal.Shared.Contracts.Internship.Responses;
+using InternPortal.Shared.Contracts.Internship.Requests;
+using InternPortal.Application.Abstractions.Services;
+using InternPortal.Infrastructure.Mappers;
+using InternPortal.Domain.Pagination;
 using InternPortal.Domain.Filters;
+using InternPortal.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
 using InternPortal.Domain.Sort;
+
 
 namespace InternPortal.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class InternshipController : Controller
+    public class InternshipController(IInternshipService internshipService) : Controller
     {
-        private readonly IInternshipService internshipService;
-
-        public InternshipController(IInternshipService internshipService)
+        [HttpGet]
+        public async Task<ActionResult<List<InternshipResponse>>> GetAll([FromQuery] BaseFilter filter, [FromQuery] SortParams sort, [FromQuery] PageParams pageParams) 
         {
-            this.internshipService = internshipService;
+            var internships = await internshipService.GetAllInternships(filter, sort, pageParams);
+
+            return Ok(internships.Select(Mapping.Mapper.Map<InternshipResponse>));
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<InternResponse>>> GetInternships([FromQuery] InternshipFilter filter, [FromQuery] SortParams sort) 
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<InternshipResponse>> GetById(Guid id)
+            => Ok(Mapping.Mapper.Map<InternshipResponse>(await internshipService.GetInternshipById(id)));
+
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<Guid>> Update(Guid id, [FromBody] InternshipRequest request)
+            => Ok(await internshipService.UpdateInternship(id, Mapping.Mapper.Map<Internship>(request)));
+
+        [HttpPost]
+        public async Task<ActionResult<Guid>> Create([FromBody] InternshipRequest request)
+            => Ok(await internshipService.CreateInternship(Mapping.Mapper.Map<Internship>(request)));
+
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult<Guid>> DeleteById(Guid id)
         {
-            var internships = await internshipService.GetAllInternships(filter, sort);
-
-            var responses = internships.Select(i => new InternshipResponse(i.Id, i.Name,
-                i.Interns.Select(x => 
-                new InternResponse(x.Id, $"{x.FirstName} {x.LastName}",x.Email, x.PhoneNumber, null,
-                new ProjectResponse(x.Project.Id, x.Project.Name, new List<InternResponse>(), x.Project.CreatedAt, x.Project.UpdatedAt),
-                x.CreatedAt, x.UpdatedAt)).ToList(),
-                i.CreatedAt, i.UpdatedAt));
-
-            return Ok(responses);
+            await internshipService.DeleteInternship(id);
+            return Ok(id);
         }
     }
 }

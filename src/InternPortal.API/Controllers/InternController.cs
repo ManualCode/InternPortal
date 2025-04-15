@@ -40,8 +40,8 @@ namespace InternPortal.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Guid>> CreateIntern([FromBody] InternRequest request)
         {
-            var internship = await internshipService.FindOrCreate(Internship.Create(Guid.NewGuid(), request.Internship, [], request.CreatedAt).Internship);
-            var project = await projectService.FindOrCreate(Project.Create(Guid.NewGuid(), request.Project, [], request.CreatedAt).Project);
+            var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreatedAt));
+            var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreatedAt));
 
             var intern = Intern.Create(request.FirstName, request.LastName, Enum.Parse<Gender>(request.Gender),
                 request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreatedAt);
@@ -52,8 +52,8 @@ namespace InternPortal.API.Controllers
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<Guid>> UpdateIntern(Guid id, [FromBody] InternRequest request)
         {
-            var internship = Internship.Create(Guid.NewGuid(), request.Internship, [], request.CreatedAt).Internship;
-            var project = Project.Create(Guid.NewGuid(), request.Project, [], request.CreatedAt).Project;
+            var internship = Internship.Create(request.Internship, [], request.CreatedAt);
+            var project = Project.Create(request.Project, [], request.CreatedAt);
 
             var intern = Intern.Create(request.FirstName, request.LastName, Enum.Parse<Gender>(request.Gender),
                 request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreatedAt);

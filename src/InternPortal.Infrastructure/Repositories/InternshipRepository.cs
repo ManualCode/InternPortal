@@ -1,25 +1,19 @@
 ﻿using InternPortal.Domain.Abstractions.Repositories;
+using InternPortal.Infrastructure.Extensions;
+using InternPortal.Infrastructure.Entities;
+using InternPortal.Infrastructure.Mappers;
+using InternPortal.Infrastructure.Data;
+using InternPortal.Domain.Pagination;
+using Microsoft.EntityFrameworkCore;
 using InternPortal.Domain.Filters;
 using InternPortal.Domain.Models;
 using InternPortal.Domain.Sort;
-using InternPortal.Infrastructure.Data;
-using InternPortal.Infrastructure.Entities;
-using InternPortal.Infrastructure.Extensions;
-using InternPortal.Infrastructure.Mappers;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace InternPortal.Infrastructure.Repositories
 {
-    public class InternshipRepository : IInternshipRepository
+    public class InternshipRepository(InternPortalDbContext dbContext) : IInternshipRepository
     {
-        private readonly InternPortalDbContext dbContext;
-
-        public InternshipRepository(InternPortalDbContext dbContext)
-        {
-            this.dbContext = dbContext;
-        }
-
         public async Task<Guid> AddAsync(Internship entity)
         {
             var internshipEntity = Mapping.Mapper.Map<InternshipEntity>(entity);
@@ -32,7 +26,16 @@ namespace InternPortal.Infrastructure.Repositories
 
         public async Task DeleteAsync(Guid id)
         {
+            var internship = dbContext.Internships
+                .Include(p => p.Interns)
+                .FirstOrDefault(p => p.Id == id)
+                ?? throw new Exception("Направление не найдено");
+
+            if (internship.Interns?.Any() == true)
+                throw new Exception("Невозможно удалить направление стажировки: к нему привязаны стажёры");
+
             await dbContext.Internships.Where(i => i.Id == id).ExecuteDeleteAsync();
+            await dbContext.SaveChangesAsync();
         }
 
         public async Task<Internship> FindOrCreateAsync(Internship internship)
@@ -51,27 +54,38 @@ namespace InternPortal.Infrastructure.Repositories
                 dbContext.SaveChanges();
             }
 
-            return Internship.Create(existingInternship.Id, existingInternship.Name, [], existingInternship.CreatedAt).Internship;
+            return Internship.Create(existingInternship.Name, [], existingInternship.CreatedAt, existingInternship.Id);
         }
 
-        public async Task<List<Internship>> GetAllAsync(InternshipFilter filter, SortParams sort)
+        public async Task<List<Internship>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams pageParams)
         {
-            var internshipEntities = await dbContext.Internships.AsNoTracking().Filter(filter)
-                .Include(i => i.Interns).ThenInclude(x => x.Project).Sort(sort).ToListAsync();
+            var internshipEntities = await dbContext.Internships
+                .AsNoTracking()
+                .Filter(filter)
+                .Include(i => i.Interns)
+                    .ThenInclude(x => x.Project)
+                .Sort(sort)
+                .Page(pageParams)
+                .ToListAsync();
 
-            var internships = internshipEntities.Select(Mapping.Mapper.Map<Internship>).ToList();
-
-            return internships;
+            return internshipEntities.Select(Mapping.Mapper.Map<Internship>).ToList();
         }
 
-        public Task<Internship?> GetByIdAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<Internship?> GetByIdAsync(Guid id)
+            => Mapping.Mapper.Map<Internship>(
+                await dbContext.Internships.Include(i => i.Interns).ThenInclude(x => x.Project)
+                    .FirstOrDefaultAsync(i => i.Id == id));
 
-        public Task<Guid> UpdateAsync(Guid id, Internship entity)
+        public async Task<Guid> UpdateAsync(Guid id, Internship entity)
         {
-            throw new NotImplementedException();
+            var internshipEntity = await dbContext.Internships.FirstOrDefaultAsync(x => x.Id == id)
+                ?? throw new Exception("Такого направления нету");
+
+            internshipEntity.Name = entity.Name;
+
+            await dbContext.SaveChangesAsync();
+
+            return id;
         }
     }
 }

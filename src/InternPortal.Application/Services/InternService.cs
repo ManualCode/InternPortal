@@ -21,6 +21,11 @@ namespace InternPortal.Application.Services
 
         public async Task<Guid> CreateIntern(Intern intern)
         {
+            if (!await internRepository.IsEmailUniqueAsync(intern.Email))
+                throw new Exception("Email должен быть уникальным");
+            if (!await internRepository.IsPhoneNumberUniqueAsync(intern.PhoneNumber))
+                throw new Exception("Номер телефона должен быть уникальным");
+
             var internId = await internRepository.AddAsync(intern);
 
             return internId;
@@ -28,7 +33,7 @@ namespace InternPortal.Application.Services
 
         public async Task<List<Intern>> GetAllInterns()
         {
-            var interns = await internRepository.GetAllAsync(null, null);
+            var interns = await internRepository.GetAllAsync();
 
             return interns;
         }

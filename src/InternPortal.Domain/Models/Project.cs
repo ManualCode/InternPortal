@@ -16,11 +16,7 @@
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public static (Project Project, string Error) Create(Guid id, string name, ICollection<Intern> interns, DateTime createdAt)
-        {
-            var error = string.Empty;
-            var project = new Project(id, name, interns, createdAt);
-            return (project, error);
-        }
+        public static Project Create(string name, ICollection<Intern> interns, DateTime createdAt, Guid? id = null)
+            => new Project(id ?? Guid.NewGuid(), name, interns, createdAt);
     }
 }
