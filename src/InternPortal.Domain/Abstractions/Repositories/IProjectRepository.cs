@@ -3,6 +3,7 @@ using InternPortal.Domain.Models;
 using InternPortal.Domain.Pagination;
 using InternPortal.Domain.Sort;
 
+
 namespace InternPortal.Domain.Abstractions.Repositories
 {
     public interface IProjectRepository : IRepository<Project>

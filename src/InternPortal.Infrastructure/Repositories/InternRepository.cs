@@ -1,30 +1,22 @@
 ﻿using InternPortal.Domain.Abstractions.Repositories;
 using InternPortal.Domain.Filters;
 using InternPortal.Domain.Models;
-using InternPortal.Domain.Sort;
 using InternPortal.Infrastructure.Data;
 using InternPortal.Infrastructure.Entities;
+using InternPortal.Infrastructure.Extensions;
 using InternPortal.Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
 
 namespace InternPortal.Infrastructure.Repositories
 {
-    public class InternRepository : IInternRepository
+    public class InternRepository(InternPortalDbContext dbContext) : IInternRepository
     {
-        private readonly InternPortalDbContext dbContext;
-
-        public InternRepository(InternPortalDbContext dbContext)
-            => this.dbContext = dbContext;
-
         public async Task<Guid> AddAsync(Intern entity)
         {
-
-            var internEntity = Mapping.Mapper.Map<InternEntity>(entity);
-
-            await dbContext.Interns.AddAsync(internEntity);
+            await dbContext.Interns.AddAsync(Mapping.Mapper.Map<InternEntity>(entity));
             await dbContext.SaveChangesAsync();
 
-            return internEntity.Id;
+            return entity.Id;
         }
 
 
@@ -34,26 +26,47 @@ namespace InternPortal.Infrastructure.Repositories
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<Intern>> GetAllAsync()
+        public async Task<List<Intern>> GetAllAsync(InternFilter filter)
         {
-            var internEntities = await dbContext.Interns.AsNoTracking()
-                .Include(i => i.Internship).Include(i => i.Project).ToListAsync();
+            var internEntities = await dbContext.Interns
+                .Include(i => i.Internship)
+                .Include(i => i.Project)
+                .Filter(filter)
+                .AsNoTracking()
+                .ToListAsync();
 
-            var interns = internEntities.Select(Mapping.Mapper.Map<Intern>).ToList();
-
-            return interns;
+            return internEntities.Select(Mapping.Mapper.Map<Intern>).ToList();
         }
 
         public async Task<Intern?> GetByIdAsync(Guid id)
         {
-            var internEntity = await dbContext.Interns.FirstOrDefaultAsync(i => i.Id == id);
+            var internEntity = await dbContext.Interns
+                .Include(x => x.Project)
+                .Include(x => x.Internship)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(i => i.Id == id);
 
             return Mapping.Mapper.Map<Intern>(internEntity);
         }
 
-        public Task<Guid> UpdateAsync(Guid id, Intern entity)
+        public async Task<Guid> UpdateAsync(Guid id, Intern entity)
         {
-            throw new NotImplementedException();
+            var internEntity = await dbContext.Interns.FirstOrDefaultAsync(x => x.Id == id)
+                ?? throw new Exception("Такого стажёра нету");
+
+            internEntity.FirstName = entity.FirstName;
+            internEntity.LastName = entity.LastName;
+            internEntity.Gender = (int) entity.Gender;
+            internEntity.Email = entity.Email;
+            internEntity.PhoneNumber = entity.PhoneNumber;
+            internEntity.BirthDate = entity.BirthDate;
+            internEntity.InternshipId = entity.Internship.Id;
+            internEntity.ProjectId = entity.Project.Id;
+            internEntity.UpdatedAt = DateTime.UtcNow;
+
+            await dbContext.SaveChangesAsync();
+
+            return id;
         }
 
         public async Task<bool> IsEmailUniqueAsync(string email)

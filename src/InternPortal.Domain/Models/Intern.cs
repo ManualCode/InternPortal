@@ -5,7 +5,7 @@ namespace InternPortal.Domain.Models
 {
     public class Intern
     {
-        private Intern(Guid id, string firstName, string lastName, Gender gender, string email, string phoneNumber,
+        private Intern(Guid id, string firstName, string lastName, Gender gender, string email, string? phoneNumber,
             DateTime birthDate, Internship internship, Project project, DateTime createdAt)
         {
             Id = id;
@@ -30,7 +30,7 @@ namespace InternPortal.Domain.Models
 
         public string Email { get; }
 
-        public string PhoneNumber { get; }
+        public string? PhoneNumber { get; }
 
         public DateTime BirthDate { get; }
 
@@ -43,8 +43,8 @@ namespace InternPortal.Domain.Models
         public DateTime UpdatedAt { get; } = DateTime.UtcNow;
 
 
-        public static Intern Create(string firstName, string lastName, Gender gender, string email, string phoneNumber,
-            DateTime birthDate, Internship internship, Project project, DateTime createdAt)
+        public static Intern Create(string firstName, string lastName, Gender gender, string email, string? phoneNumber,
+            DateTime birthDate, Internship internship, Project project, DateTime createdAt, Guid? id = null)
         {
             MailAddress? _mail;
 
@@ -54,7 +54,7 @@ namespace InternPortal.Domain.Models
             if (!string.IsNullOrWhiteSpace(phoneNumber) && !Regex.IsMatch(phoneNumber, @"^(\+7\d{10})?$"))
                 throw new Exception("Некорректный номер телефона");
 
-            return new Intern(Guid.NewGuid(), firstName, lastName, gender, email, phoneNumber, birthDate, internship, project, createdAt);
+            return new Intern(id ?? Guid.NewGuid(), firstName, lastName, gender, email, phoneNumber, birthDate, internship, project, createdAt);
         }
     }
 }

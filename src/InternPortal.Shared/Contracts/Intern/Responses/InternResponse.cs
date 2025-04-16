@@ -11,7 +11,7 @@ namespace InternPortal.Shared.Contracts.Intern.Responses
     string Email,
     string PhoneNumber,
     InternshipResponse Internship,
-    ProjectResponse? ProjectName,
+    ProjectResponse Project,
     DateTime CreateAt,
     DateTime UpdateAt);
 }

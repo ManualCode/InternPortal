@@ -2,6 +2,9 @@
 using InternPortal.Domain.Models;
 using InternPortal.Infrastructure.Entities;
 using InternPortal.Shared.Contracts.Intern.Responses;
+using InternPortal.Shared.Contracts.Internship.Requests;
+using InternPortal.Shared.Contracts.Internship.Responses;
+using InternPortal.Shared.Contracts.Project.Responses;
 
 
 namespace InternPortal.Infrastructure.Mappers.Profiles
@@ -29,7 +32,8 @@ namespace InternPortal.Infrastructure.Mappers.Profiles
                                ie.BirthDate,
                                internship,
                                project,
-                               ie.CreatedAt
+                               ie.CreatedAt,
+                               ie.Id
                            );
                        })
                        .PreserveReferences();
@@ -42,10 +46,15 @@ namespace InternPortal.Infrastructure.Mappers.Profiles
                 .ForMember(dest => dest.InternshipId, opt => opt.MapFrom(src => src.Internship.Id));
 
             CreateMap<Intern, InternResponse>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber));
+                .ConstructUsing((Intern i) => new InternResponse(i.Id, $"{i.FirstName} {i.LastName}", i.Email, i.PhoneNumber,
+                new InternshipResponse(i.Internship.Id, i.Internship.Name, null, i.Internship.CreatedAt, i.Internship.UpdatedAt),
+                new ProjectResponse(i.Project.Id, i.Project.Name, null, i.Project.CreatedAt, i.Project.UpdatedAt),
+                i.CreatedAt, i.UpdatedAt))
+                 .ForPath(dest => dest.Project.InternIds, opt => opt.Ignore())
+                 .ForPath(dest => dest.Internship.InternIds, opt => opt.Ignore());
+
+            CreateMap<InternshipRequest, Internship>()
+                .ConstructUsing((InternshipRequest ir) => Internship.Create(ir.Name, ir.interns, ir.CreatedAt, null));
         }
     }
 }

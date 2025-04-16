@@ -2,21 +2,21 @@
 {
     public class Project
     {
-        public Project(Guid id, string name, ICollection<Intern> interns, DateTime createdAt)
+        public Project(Guid id, string name, ICollection<Guid> internIds, DateTime createdAt)
         {
             Id = id;
             Name = name;
-            Interns = interns;
+            InternIds = internIds;
             CreatedAt = createdAt;
         }
 
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public ICollection<Intern> Interns { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public Guid Id { get; }
+        public string Name { get; }
+        public ICollection<Guid> InternIds { get; }
+        public DateTime CreatedAt { get; }
+        public DateTime UpdatedAt { get; }
 
-        public static Project Create(string name, ICollection<Intern> interns, DateTime createdAt, Guid? id = null)
-            => new Project(id ?? Guid.NewGuid(), name, interns, createdAt);
+        public static Project Create(string name, ICollection<Guid> internIds, DateTime createdAt, Guid? id = null)
+            => new Project(id ?? Guid.NewGuid(), name, internIds, createdAt);
     }
 }

@@ -14,12 +14,25 @@ namespace InternPortal.Infrastructure.Repositories
 {
     public class ProjectRepository(InternPortalDbContext dbContext) : IProjectRepository
     {
-        public async Task<Guid> AddAsync(Project entity)
+        public async Task<Guid> AddAsync(Project project)
         {
-            await dbContext.Projects.AddAsync(Mapping.Mapper.Map<ProjectEntity>(entity));
+            var existingInterns = await dbContext.Interns
+                .Where(i => project.InternIds.Contains(i.Id))
+                .ToListAsync();
+
+            var projectEntity = new ProjectEntity
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Interns = existingInterns,
+                CreatedAt = project.CreatedAt,
+                UpdatedAt = project.UpdatedAt
+            };
+
+            await dbContext.Projects.AddAsync(projectEntity);
             await dbContext.SaveChangesAsync();
 
-            return entity.Id;
+            return projectEntity.Id;
         }
 
         public async Task DeleteAsync(Guid id)
@@ -79,7 +92,12 @@ namespace InternPortal.Infrastructure.Repositories
             var projectEntity = await dbContext.Projects.FirstOrDefaultAsync(x => x.Id == id)
                 ?? throw new Exception("Такого проекта нету");
 
+            var existingInterns = await dbContext.Interns
+                .Where(i => entity.InternIds.Contains(i.Id))
+                .ToListAsync();
+
             projectEntity.Name = entity.Name;
+            projectEntity.Interns = existingInterns;
 
             await dbContext.SaveChangesAsync();
 

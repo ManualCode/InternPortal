@@ -10,6 +10,7 @@ namespace InternPortal.Shared.Contracts.Project.Requests
     public sealed record ProjectRequest(
         [Required]
         string Name,
+        List<Guid> interns,
         DateTime CreatedAt,
         DateTime UpdateAt
     );

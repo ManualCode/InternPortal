@@ -16,12 +16,23 @@ namespace InternPortal.Infrastructure.Repositories
     {
         public async Task<Guid> AddAsync(Internship entity)
         {
-            var internshipEntity = Mapping.Mapper.Map<InternshipEntity>(entity);
+            var existingInterns = await dbContext.Interns
+                .Where(i => entity.InternIds.Contains(i.Id))
+                .ToListAsync();
 
-            await dbContext.Internships.AddAsync(internshipEntity);
+            var projectEntity = new InternshipEntity
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Interns = existingInterns,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt
+            };
+
+            await dbContext.Internships.AddAsync(projectEntity);
             await dbContext.SaveChangesAsync();
 
-            return internshipEntity.Id;
+            return projectEntity.Id;
         }
 
         public async Task DeleteAsync(Guid id)
@@ -81,7 +92,12 @@ namespace InternPortal.Infrastructure.Repositories
             var internshipEntity = await dbContext.Internships.FirstOrDefaultAsync(x => x.Id == id)
                 ?? throw new Exception("Такого направления нету");
 
+            var existingInterns = await dbContext.Interns
+                .Where(i => entity.InternIds.Contains(i.Id))
+                .ToListAsync();
+
             internshipEntity.Name = entity.Name;
+            internshipEntity.Interns = existingInterns;
 
             await dbContext.SaveChangesAsync();
 

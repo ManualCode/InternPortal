@@ -8,11 +8,11 @@ using InternPortal.Domain.Sort;
 
 namespace InternPortal.Application.Services
 {
-    public class ProjectService(IProjectRepository projectRepository) : IProjectSevice
+    public class ProjectService(IProjectRepository projectRepository, IInternRepository internRepository) : IProjectSevice
     {
         public async Task<Guid> CreateProject(Project project)
             => await projectRepository.AddAsync(project);
-
+        
         public async Task DeleteProject(Guid id)
             => await projectRepository.DeleteAsync(id);
 

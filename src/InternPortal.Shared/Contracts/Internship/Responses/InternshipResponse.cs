@@ -1,12 +1,9 @@
-﻿using InternPortal.Shared.Contracts.Intern.Responses;
-
-
-namespace InternPortal.Shared.Contracts.Internship.Responses
+﻿namespace InternPortal.Shared.Contracts.Internship.Responses
 {
     public sealed record InternshipResponse(
     Guid Id,
     string Name,
-    List<InternResponse> Inters,
+    List<Guid> InternIds,
     DateTime CreateAt,
     DateTime UpdateAt);
 }
