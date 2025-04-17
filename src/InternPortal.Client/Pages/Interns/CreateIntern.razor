@@ -1,0 +1,130 @@
+﻿@page "/interns/create"
+@using InternPortal.Client.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Добавить нового стажера</h3>
+
+<EditForm Model="@NewIntern" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="firstName">Имя *</label>
+        <InputText id="firstName" @bind-Value="NewIntern.FirstName" class="form-control" />
+        <ValidationMessage For="@(() => NewIntern.FirstName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="lastName">Фамилия *</label>
+        <InputText id="lastName" @bind-Value="NewIntern.LastName" class="form-control" />
+        <ValidationMessage For="@(() => NewIntern.LastName)" />
+    </div>
+
+    <div class="form-group">
+        <MudRadioGroup @bind-Value="NewIntern.Gender">
+            <MudRadio Value="@(Gender.Мужчина.ToString())" Color="Color.Primary" Dense="true">Мужчина</MudRadio>
+            <MudRadio Value="@(Gender.Женщина.ToString())" Color="Color.Primary" Dense="false">Женщина</MudRadio>
+        </MudRadioGroup>
+        <ValidationMessage For="@(() => NewIntern.Gender)" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email *</label>
+        <InputText id="email" @bind-Value="NewIntern.Email" class="form-control" />
+        <ValidationMessage For="@(() => NewIntern.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="phone">Телефон</label>
+        <InputText id="phone" @bind-Value="NewIntern.PhoneNumber" class="form-control" placeholder="+7**********" />
+        <ValidationMessage For="@(() => NewIntern.PhoneNumber)" />
+    </div>
+
+    <div class="form-group">
+        <label for="birthDate">Дата рождения *</label>
+        <MudDatePicker Editable="true" @bind-Date="NewIntern.BirthDate" />
+        <ValidationMessage For="@(() => NewIntern.BirthDate)" />
+    </div>
+
+    <div class="form-group">
+        <label for="direction">Направление *</label>
+        <div class="d-flex">
+            <MudAutocomplete T="string"
+                             @bind-Value="NewIntern.Internship"
+                             SearchFunc="@GetInternships"
+                             CoerceText="true"
+                             ResetValueOnEmptyText="true"
+                             CoerceValue="true">
+            </MudAutocomplete>
+        </div>
+        <ValidationMessage For="@(() => NewIntern.Internship)" />
+    </div>
+
+    <div class="form-group">
+        <label for="project">Проект *</label>
+        <div class="d-flex">
+            <MudAutocomplete T="string"
+                             @bind-Value="NewIntern.Project"
+                             SearchFunc="@GetProjects"
+                             CoerceText="true"
+                             ResetValueOnEmptyText="true"
+                             CoerceValue="true">
+            </MudAutocomplete>
+        </div>
+        <ValidationMessage For="@(() => NewIntern.Internship)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
+    <button type="button" class="btn btn-outline-secondary mt-3 ms-2" @onclick="Cancel">Отмена</button>
+</EditForm>
+
+@code {
+    private Intern NewIntern { get; set; } = new();
+    private List<string> Internships { get; set; } = new();
+    private List<string>? ProjectNames { get; set; } = new();
+
+    private async Task<IEnumerable<string>> GetInternships(string value, CancellationToken token)
+    {
+        if (string.IsNullOrEmpty(value))
+            return Internships;
+
+        return Internships.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task<IEnumerable<string>> GetProjects(string value, CancellationToken token)
+    {
+        if (string.IsNullOrEmpty(value))
+            return ProjectNames;
+
+        return ProjectNames.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Internships = (await Http.GetFromJsonAsync<List<Internship>>("/api/Internship/GetAll")).Select(x => x.Name).ToList();
+        ProjectNames = (await Http.GetFromJsonAsync<List<Project>>("/api/Project/GetAll")).Select(x => x.Name).ToList();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        NewIntern.BirthDate = DateTime.SpecifyKind((DateTime)NewIntern.BirthDate, DateTimeKind.Utc);
+        var response = await Http.PostAsJsonAsync("api/Intern/Create", NewIntern);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/interns/create");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Ошибка: {errorMessage}");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/interns/create");
+
+    }
+}

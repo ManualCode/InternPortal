@@ -10,7 +10,7 @@ namespace InternPortal.Domain.Abstractions.Repositories
 
         Task<bool> IsEmailUniqueAsync(string email);
 
-        Task<bool> IsPhoneNumberUniqueAsync(string phoneNumber);
+        Task<bool> IsPhoneNumberUniqueAsync(string? phoneNumber);
 
     }
 }

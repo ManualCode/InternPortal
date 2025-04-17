@@ -36,7 +36,7 @@ namespace InternPortal.Domain.Models
 
         public Internship Internship { get; }
 
-        public Project? Project { get; }
+        public Project Project { get; }
 
         public DateTime CreatedAt { get; }
 

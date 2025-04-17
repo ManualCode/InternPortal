@@ -1,0 +1,110 @@
+﻿@page "/interns"
+@using InternPortal.Client.Models
+@using MudBlazor
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+
+<MudCard>
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="4">
+                <MudSelect T="string" Label="Фильтр по направлению" @bind-Value="SelectedInternship"
+                           AnchorOrigin="Origin.BottomCenter" Clearable="true">
+                    @foreach (var internship in Internships)
+                    {
+                        <MudSelectItem Value="@internship">@internship</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudSelect T="string" Label="Фильтр по проекту" @bind-Value="SelectedProject"
+                           AnchorOrigin="Origin.BottomCenter" Clearable="true">
+                    @foreach (var project in Projects)
+                    {
+                        <MudSelectItem Value="@project">@project</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4" Class="d-flex align-center">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           OnClick="ApplyFilters" Class="ml-auto">
+                    Применить фильтры
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+<MudTable Items="@FilteredInterns" Hover="true" Breakpoint="Breakpoint.None">
+    <HeaderContent>
+        <MudTh>ФИО</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Направление</MudTh>
+        <MudTh>Проект</MudTh>
+        <MudTh>Действия</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ФИО">@context.LastName @context.FirstName</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd DataLabel="Направление">@context.Internship</MudTd>
+        <MudTd DataLabel="Проект">@context.Project</MudTd>
+
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="@(new int[] {10, 25, 50})" />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private List<Intern> AllInterns = new();
+    private List<Intern> FilteredInterns = new();
+    private List<string> Internships = new();
+    private List<string> Projects = new();
+    private string? SelectedInternship;
+    private string? SelectedProject;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            // Загрузка всех стажёров
+            AllInterns = await Http.GetFromJsonAsync<List<Intern>>("api/Intern/GetAll") ?? new();
+            FilteredInterns = AllInterns;
+
+            // Загрузка уникальных направлений и проектов для фильтров
+            Internships = AllInterns.Select(i => i.Internship).Distinct().ToList();
+            Projects = AllInterns.Select(i => i.Project).Distinct().ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Ошибка загрузки: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        FilteredInterns = AllInterns
+            .Where(i => (SelectedInternship == null || i.Internship == SelectedInternship) &&
+                       (SelectedProject == null || i.Project == SelectedProject))
+            .ToList();
+    }
+
+    private void EditIntern(Guid id)
+    {
+        Navigation.NavigateTo($"/interns/edit/{id}");
+    }
+
+    private async Task DeleteIntern(Guid id)
+    {
+
+
+
+    }
+}

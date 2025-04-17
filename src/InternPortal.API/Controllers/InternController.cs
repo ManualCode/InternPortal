@@ -26,7 +26,7 @@ namespace InternPortal.API.Controllers
             => Ok(Mapping.Mapper.Map<InternResponse>(await internService.GetInternById(id)));
 
         [HttpPost]
-        public async Task<ActionResult<Guid>> CreateIntern([FromBody] InternRequest request)
+        public async Task<ActionResult<Guid>> Create([FromBody] InternRequest request)
         {
             var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreatedAt));
             var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreatedAt));
@@ -37,7 +37,7 @@ namespace InternPortal.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult<Guid>> UpdateIntern(Guid id, [FromBody] InternRequest request)
+        public async Task<ActionResult<Guid>> Update(Guid id, [FromBody] InternRequest request)
         {
             var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreatedAt));
             var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreatedAt));
@@ -48,7 +48,7 @@ namespace InternPortal.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<Guid>> DeleteIntern(Guid id)
+        public async Task<ActionResult<Guid>> Delete(Guid id)
         {
             await internService.DeleteIntern(id);
 
