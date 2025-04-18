@@ -1,4 +1,6 @@
-﻿namespace InternPortal.Client.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace InternPortal.Client.Models
 {
     public class Project
     {

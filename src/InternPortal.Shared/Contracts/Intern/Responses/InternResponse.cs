@@ -8,6 +8,7 @@ namespace InternPortal.Shared.Contracts.Intern.Responses
     public sealed record InternResponse(
     Guid Id,
     string FullName,
+    DateTime BirthDate,
     string Email,
     string PhoneNumber,
     InternshipResponse Internship,

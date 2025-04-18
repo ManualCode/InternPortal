@@ -46,7 +46,7 @@ namespace InternPortal.Infrastructure.Mappers.Profiles
                 .ForMember(dest => dest.InternshipId, opt => opt.MapFrom(src => src.Internship.Id));
 
             CreateMap<Intern, InternResponse>()
-                .ConstructUsing((Intern i) => new InternResponse(i.Id, $"{i.FirstName} {i.LastName}", i.Email, i.PhoneNumber,
+                .ConstructUsing((Intern i) => new InternResponse(i.Id, $"{i.FirstName} {i.LastName}", i.BirthDate, i.Email, i.PhoneNumber,
                 new InternshipResponse(i.Internship.Id, i.Internship.Name, null, i.Internship.CreatedAt, i.Internship.UpdatedAt),
                 new ProjectResponse(i.Project.Id, i.Project.Name, null, i.Project.CreatedAt, i.Project.UpdatedAt),
                 i.CreatedAt, i.UpdatedAt))

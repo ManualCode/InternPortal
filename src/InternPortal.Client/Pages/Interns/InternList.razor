@@ -1,110 +1,114 @@
 ﻿@page "/interns"
-@using InternPortal.Client.Models
-@using MudBlazor
-@inject HttpClient Http
-@inject ISnackbar Snackbar
+@using Microsoft.Extensions.Primitives
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
+@using InternPortal.Client.Models
+@inject HttpClient Http
 
 
 <MudCard>
     <MudCardContent>
         <MudGrid>
             <MudItem xs="12" sm="6" md="4">
-                <MudSelect T="string" Label="Фильтр по направлению" @bind-Value="SelectedInternship"
+                <MudSelect T="string" Label="Направление" @bind-Value="SelectedInternship"
                            AnchorOrigin="Origin.BottomCenter" Clearable="true">
-                    @foreach (var internship in Internships)
+                    @foreach (var internship in AvailableInternships)
                     {
                         <MudSelectItem Value="@internship">@internship</MudSelectItem>
                     }
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" sm="6" md="4">
-                <MudSelect T="string" Label="Фильтр по проекту" @bind-Value="SelectedProject"
+                <MudSelect T="string" Label="Проект" @bind-Value="SelectedProject"
                            AnchorOrigin="Origin.BottomCenter" Clearable="true">
-                    @foreach (var project in Projects)
+                    @foreach (var project in AvailableProjects)
                     {
                         <MudSelectItem Value="@project">@project</MudSelectItem>
                     }
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" sm="6" md="4" Class="d-flex align-center">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                           OnClick="ApplyFilters" Class="ml-auto">
-                    Применить фильтры
-                </MudButton>
+                <MudButton OnClick="ApplyFilters" Class="ml-auto">Применить</MudButton>
+                <MudButton OnClick="ResetFilters" Class="ml-2">Сбросить</MudButton>
             </MudItem>
         </MudGrid>
     </MudCardContent>
 </MudCard>
 
-<MudTable Items="@FilteredInterns" Hover="true" Breakpoint="Breakpoint.None">
+<MudTable Items="@AllInterns" Hover="true" Breakpoint="Breakpoint.None">
     <HeaderContent>
         <MudTh>ФИО</MudTh>
+        <MudTh>Дата рождения</MudTh>
         <MudTh>Email</MudTh>
+        <MudTh>Номер</MudTh>
         <MudTh>Направление</MudTh>
         <MudTh>Проект</MudTh>
         <MudTh>Действия</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="ФИО">@context.LastName @context.FirstName</MudTd>
+        <MudTd DataLabel="ФИО">@context.FullName</MudTd>
+        <MudTd DataLabel="Дата рождения">@context.BirthDate.ToShortDateString()</MudTd>
         <MudTd DataLabel="Email">@context.Email</MudTd>
-        <MudTd DataLabel="Направление">@context.Internship</MudTd>
-        <MudTd DataLabel="Проект">@context.Project</MudTd>
+        <MudTd DataLabel="Номер">@context.PhoneNumber</MudTd>
+        <MudTd DataLabel="Направление">@context.Internship.Name</MudTd>
+        <MudTd DataLabel="Проект">@context.Project.Name</MudTd>
 
     </RowTemplate>
-    <PagerContent>
-        <MudTablePager PageSizeOptions="@(new int[] {10, 25, 50})" />
-    </PagerContent>
 </MudTable>
 
 @code {
-    private List<Intern> AllInterns = new();
-    private List<Intern> FilteredInterns = new();
-    private List<string> Internships = new();
-    private List<string> Projects = new();
+    private List<InternForList> AllInterns = new();
+    private List<InternForList> FilteredInterns = new();
+    private List<string> AvailableInternships = new();
+    private List<string> AvailableProjects = new();
+
     private string? SelectedInternship;
     private string? SelectedProject;
 
     protected override async Task OnInitializedAsync()
     {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Internship", out var internship))
+        {
+            SelectedInternship = internship.First();
+        }
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Project", out var project))
+        {
+            SelectedProject = project.First();
+        }
+
         await LoadData();
+        ApplyFilters();
     }
 
     private async Task LoadData()
     {
-        try
-        {
-            // Загрузка всех стажёров
-            AllInterns = await Http.GetFromJsonAsync<List<Intern>>("api/Intern/GetAll") ?? new();
-            FilteredInterns = AllInterns;
-
-            // Загрузка уникальных направлений и проектов для фильтров
-            Internships = AllInterns.Select(i => i.Internship).Distinct().ToList();
-            Projects = AllInterns.Select(i => i.Project).Distinct().ToList();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Ошибка загрузки: {ex.Message}", Severity.Error);
-        }
+        AllInterns = await Http.GetFromJsonAsync<List<InternForList>>("api/Intern/GetAll") ?? new();
+        AvailableInternships = AllInterns.Select(i => i.Internship.Name).Distinct().ToList();
+        AvailableProjects = AllInterns.Select(i => i.Project.Name).Distinct().ToList();
     }
 
     private void ApplyFilters()
     {
+        var queryParams = new Dictionary<string, string>();
+        if (!string.IsNullOrEmpty(SelectedInternship))
+            queryParams["Internship"] = SelectedInternship;
+        if (!string.IsNullOrEmpty(SelectedProject))
+            queryParams["Project"] = SelectedProject;
+
+        var newUri = QueryHelpers.AddQueryString("/interns", queryParams);
+        Navigation.NavigateTo(newUri);
+
         FilteredInterns = AllInterns
-            .Where(i => (SelectedInternship == null || i.Internship == SelectedInternship) &&
-                       (SelectedProject == null || i.Project == SelectedProject))
+            .Where(i => (SelectedInternship == null || i.Internship.Name == SelectedInternship) &&
+                       (SelectedProject == null || i.Project.Name == SelectedProject))
             .ToList();
     }
 
-    private void EditIntern(Guid id)
+    private void ResetFilters()
     {
-        Navigation.NavigateTo($"/interns/edit/{id}");
-    }
-
-    private async Task DeleteIntern(Guid id)
-    {
-
-
-
+        SelectedInternship = null;
+        SelectedProject = null;
+        Navigation.NavigateTo("/interns"); // Переходим без параметров
     }
 }

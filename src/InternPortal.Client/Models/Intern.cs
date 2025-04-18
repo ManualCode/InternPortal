@@ -35,10 +35,4 @@ namespace InternPortal.Client.Models
         [Required(ErrorMessage = "Укажите название проекта")]
         public string Project { get; set; }
     }
-
-    public enum Gender
-    {
-        Мужчина,
-        Женщина
-    }
 }
