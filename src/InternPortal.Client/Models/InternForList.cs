@@ -2,7 +2,7 @@
 {
     public class InternForList
     {
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
 
         public string FullName { get; set; }
 

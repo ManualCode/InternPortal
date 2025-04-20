@@ -35,7 +35,7 @@
     </MudCardContent>
 </MudCard>
 
-<MudTable Items="@AllInterns" Hover="true" Breakpoint="Breakpoint.None">
+<MudTable Items="@FilteredInterns" Hover="true" Breakpoint="Breakpoint.None">
     <HeaderContent>
         <MudTh>ФИО</MudTh>
         <MudTh>Дата рождения</MudTh>
@@ -43,7 +43,7 @@
         <MudTh>Номер</MudTh>
         <MudTh>Направление</MudTh>
         <MudTh>Проект</MudTh>
-        <MudTh>Действия</MudTh>
+        <MudTh>Редактировать</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="ФИО">@context.FullName</MudTd>
@@ -52,9 +52,34 @@
         <MudTd DataLabel="Номер">@context.PhoneNumber</MudTd>
         <MudTd DataLabel="Направление">@context.Internship.Name</MudTd>
         <MudTd DataLabel="Проект">@context.Project.Name</MudTd>
-
+        <MudTd DataLabel="Редактировать">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                           Color="Color.Primary"
+                           OnClick="@(() => ShowEditDialog(context))" />
+        </MudTd>
     </RowTemplate>
 </MudTable>
+
+
+
+<MudDialog @bind-IsVisible="isEditDialogVisible" MaxWidth="MaxWidth.Medium">
+    <DialogContent>
+        <EditForm Model="@CurrentIntern" OnValidSubmit="@SaveIntern">
+            <DataAnnotationsValidator />
+
+            <MudTextField Label="Имя" @bind-Value="CurrentIntern.FirstName" />
+            <MudTextField Label="Фамилия" @bind-Value="CurrentIntern.LastName" />
+            <MudSelect Label="Направление" @bind-Value="CurrentIntern.Internship">
+                @foreach (var dir in AvailableInternships)
+                {
+                    <MudSelectItem Value="@dir">@dir</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled">Сохранить</MudButton>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
 
 @code {
     private List<InternForList> AllInterns = new();
@@ -69,13 +94,9 @@
     {
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Internship", out var internship))
-        {
             SelectedInternship = internship.First();
-        }
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Project", out var project))
-        {
             SelectedProject = project.First();
-        }
 
         await LoadData();
         ApplyFilters();
@@ -109,6 +130,38 @@
     {
         SelectedInternship = null;
         SelectedProject = null;
-        Navigation.NavigateTo("/interns"); // Переходим без параметров
+        FilteredInterns = AllInterns;
+        Navigation.NavigateTo("/interns");
+    }
+
+
+
+
+    private bool isEditDialogVisible;
+    private Intern CurrentIntern = new();
+
+
+    private async void ShowEditDialog(InternForList intern)
+    {
+        Console.WriteLine("wwwwwww");
+        CurrentIntern = await Http.GetFromJsonAsync<Intern>($"api/Intern/GetById/{intern.Id}") ?? new();
+        isEditDialogVisible = true;
+    }
+
+    private async Task SaveIntern()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Intern/Add", CurrentIntern);
+            if (response.IsSuccessStatusCode)
+            {
+                //await LoadInterns(); // Перезагружаем список
+                isEditDialogVisible = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка: {ex.Message}", Severity.Error);
+        }
     }
 }

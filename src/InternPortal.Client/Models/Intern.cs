@@ -4,7 +4,7 @@ namespace InternPortal.Client.Models
 {
     public class Intern
     {
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "Введите имя")]
         [StringLength(20, ErrorMessage = "Имя не должно превышать 20 символов")]
