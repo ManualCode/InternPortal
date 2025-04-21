@@ -1,0 +1,24 @@
+﻿@page "/entities"
+@using InternPortal.Client.Models
+@using MudBlazor
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.WebUtilities
+@using InternPortal.Client.Pages.Internships
+@using InternPortal.Client.Pages.Projects
+
+<MudTabs @bind-ActivePanelIndex="activeTabIndex" CenterActiveTab="true">
+    <MudTabPanel Text="Направления">
+        <InternshipCard />
+    </MudTabPanel>
+
+    <MudTabPanel Text="Проекты">
+        <ProjectCard />
+    </MudTabPanel>
+</MudTabs>
+
+
+@code {
+    private int activeTabIndex = 0;
+}

@@ -1,0 +1,93 @@
+﻿@using InternPortal.Client.Models;
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<EditForm Model="@Internship" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @if (ShowInternshipId)
+    {
+        <div class="form-group" read>
+            <label for="id">Id *</label>
+            <InputText id="firstName" @bind-Value="IdString" class="form-control" ReadOnly="true" />
+            <ValidationMessage For="@(() => Internship.Id)" />
+        </div>
+    }
+
+    <div class="form-group">
+        <label for="firstName">Имя *</label>
+        <InputText id="firstName" @bind-Value="Internship.Name" class="form-control" />
+        <ValidationMessage For="@(() => Internship.Name)" />
+    </div>
+
+    <MudSelect T="Guid"
+               Label="Выберите стажеров"
+               MultiSelection="true"
+               @bind-SelectedValues="selectedInternIds">
+        @foreach (var intern in Interns)
+        {
+            <MudSelectItem T="Guid"
+                           Value="@intern.Id"
+                           Disabled="@(selectedInternIds.Contains(intern.Id) && !CanDeselect)">
+                @intern.FullName
+            </MudSelectItem>
+        }
+    </MudSelect>
+
+    <button type="button" class="btn btn-outline-secondary mt-3 ms-2" @onclick="Cancel">Отмена</button>
+    <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public bool ShowInternshipId { get; set; } = false;
+
+    [Parameter]
+    public Func<Internship, Task<HttpResponseMessage>> SubmitAction { get; set; }
+
+    [Parameter]
+    public Internship Internship { get; set; } = new();
+
+    private List<InternForList> Interns { get; set; } = new();
+
+    private IEnumerable<Guid> selectedInternIds = new HashSet<Guid>();
+
+    private bool CanDeselect = false;
+
+    private string IdString
+    {
+        get => Internship.Id.ToString();
+        set => Internship.Id = Guid.TryParse(value, out var guid) ? guid : Guid.Empty;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Interns = await Http.GetFromJsonAsync<List<InternForList>>("/api/Intern/GetAll");
+        if (ShowInternshipId)
+            selectedInternIds = Internship.Interns;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Internship.Interns = selectedInternIds.ToList();
+        var response = await SubmitAction(Internship);
+
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/entities");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Ошибка: {errorMessage}");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/entities");
+
+    }
+}

@@ -16,6 +16,7 @@ namespace InternPortal.Infrastructure.Extensions
     {
         public static IQueryable<InternshipEntity> Page(this IQueryable<InternshipEntity> query, PageParams pageParams)
         {
+            if (pageParams == null) return query;
             var page = pageParams.Page ?? 1;
             var pageSize = pageParams.PageSize ?? 10;
             

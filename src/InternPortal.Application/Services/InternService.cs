@@ -12,7 +12,8 @@ namespace InternPortal.Application.Services
         {
             if (!await internRepository.IsEmailUniqueAsync(intern.Email))
                 throw new Exception("Email должен быть уникальным");
-            if (!await internRepository.IsPhoneNumberUniqueAsync(intern.PhoneNumber))
+            if (!string.IsNullOrWhiteSpace(intern.PhoneNumber) 
+                && !await internRepository.IsPhoneNumberUniqueAsync(intern.PhoneNumber))
                 throw new Exception("Номер телефона должен быть уникальным");
 
             return await internRepository.AddAsync(intern);

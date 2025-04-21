@@ -3,30 +3,30 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternPortal.API", "src\InternPortal.API\InternPortal.API.csproj", "{5152EA7E-23E2-4C89-9696-76270EAF1EB2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.API", "src\InternPortal.API\InternPortal.API.csproj", "{5152EA7E-23E2-4C89-9696-76270EAF1EB2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{03AEDE88-E00B-461F-B324-73806A5CF8E1} = {03AEDE88-E00B-461F-B324-73806A5CF8E1}
 		{26C56201-82C6-4A94-92D4-DE434B38CAE7} = {26C56201-82C6-4A94-92D4-DE434B38CAE7}
 		{9CD82D77-BFF1-4148-A3FB-633066BF6EFE} = {9CD82D77-BFF1-4148-A3FB-633066BF6EFE}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternPortal.Application", "src\InternPortal.Application\InternPortal.Application.csproj", "{03AEDE88-E00B-461F-B324-73806A5CF8E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Application", "src\InternPortal.Application\InternPortal.Application.csproj", "{03AEDE88-E00B-461F-B324-73806A5CF8E1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9CD82D77-BFF1-4148-A3FB-633066BF6EFE} = {9CD82D77-BFF1-4148-A3FB-633066BF6EFE}
 		{C46D9618-12B7-4EC6-B5DD-0F9DDD61FCF9} = {C46D9618-12B7-4EC6-B5DD-0F9DDD61FCF9}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternPortal.Infrastructure", "src\InternPortal.Infrastructure\InternPortal.Infrastructure.csproj", "{C46D9618-12B7-4EC6-B5DD-0F9DDD61FCF9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Infrastructure", "src\InternPortal.Infrastructure\InternPortal.Infrastructure.csproj", "{C46D9618-12B7-4EC6-B5DD-0F9DDD61FCF9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{26C56201-82C6-4A94-92D4-DE434B38CAE7} = {26C56201-82C6-4A94-92D4-DE434B38CAE7}
 		{9CD82D77-BFF1-4148-A3FB-633066BF6EFE} = {9CD82D77-BFF1-4148-A3FB-633066BF6EFE}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternPortal.Domain", "src\InternPortal.Domain\InternPortal.Domain.csproj", "{9CD82D77-BFF1-4148-A3FB-633066BF6EFE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Domain", "src\InternPortal.Domain\InternPortal.Domain.csproj", "{9CD82D77-BFF1-4148-A3FB-633066BF6EFE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternPortal.Shared", "src\InternPortal.Shared\InternPortal.Shared.csproj", "{26C56201-82C6-4A94-92D4-DE434B38CAE7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Shared", "src\InternPortal.Shared\InternPortal.Shared.csproj", "{26C56201-82C6-4A94-92D4-DE434B38CAE7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternPortal.Client", "src\InternPortal.Client\InternPortal.Client.csproj", "{795160D4-6DFE-4F47-93D2-8CA356D9C9BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Client", "src\InternPortal.Client\InternPortal.Client.csproj", "{795160D4-6DFE-4F47-93D2-8CA356D9C9BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

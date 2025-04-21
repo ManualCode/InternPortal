@@ -16,11 +16,14 @@ namespace InternPortal.API.Controllers
     public class InternshipController(IInternshipService internshipService) : Controller
     {
         [HttpGet]
-        public async Task<ActionResult<List<InternshipResponse>>> GetAll([FromQuery] BaseFilter filter, [FromQuery] SortParams sort, [FromQuery] PageParams pageParams) 
+        public async Task<ActionResult<PagedInternshipResponse>> GetAll([FromQuery] BaseFilter filter, [FromQuery] SortParams sort, [FromQuery] PageParams pageParams) 
         {
             var internships = await internshipService.GetAllInternships(filter, sort, pageParams);
+            //плохо
+            var internshipsCount = (await internshipService.GetAllInternships(filter, sort, null)).Count;
 
-            return Ok(internships.Select(Mapping.Mapper.Map<InternshipResponse>));
+            var p = new PagedInternshipResponse(internshipsCount, internships.Select(Mapping.Mapper.Map<InternshipResponse>).ToList());
+            return Ok(p);
         }
 
         [HttpGet("{id:guid}")]

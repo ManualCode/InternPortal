@@ -1,0 +1,227 @@
+﻿@using Microsoft.AspNetCore.WebUtilities
+@using InternPortal.Client.Models
+@inject NavigationManager Navigation
+@inject HttpClient Http
+@using InternPortal.Client.Pages.Interns
+@inject IDialogService DialogService
+@using InternPortal.Client.Pages.Internships
+
+
+<MudCard>
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" sm="6" Class="d-flex justify-end">
+                <MudTextField @bind-Value="Filter"
+                              Label="Поиск по названию"
+                              Immediate="true"
+                              Adornment="Adornment.Start" />
+
+                <MudSelect @bind-Value="OrderBy" Label="Сортировать по" Adornment="Adornment.Start">
+                    <MudSelectItem Value='"Name"'>Название</MudSelectItem>
+                    <MudSelectItem Value='"Interns"'>Количество стажёров</MudSelectItem>
+                </MudSelect>
+
+                <MudCheckBox IndeterminateIcon="@MudBlazor.Icons.Material.Filled.CheckBoxOutlineBlank"
+                             LabelPlacement="Placement.Start"
+                             @bind-Value="SortDirection"
+                             Color="Color.Primary"
+                             Label="По убыванию" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Search"
+                               Color="Color.Primary"
+                               OnClick="LoadData" />
+            </MudItem>
+            <MudItem xs="12" sm="6" Class="d-flex justify-end">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="(()=> CreateInternshipDialogAsync(new Internship()))">
+                    Добавить направление
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
+        <MudTable Items="@Internships" Hover="true" RowsPerPage="@PageSize">
+            <HeaderContent>
+                <MudTh>Название</MudTh>
+                <MudTh>Количество стажеров</MudTh>
+                <MudTh>Действия</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>
+                    <MudMenu>
+                        <ActivatorContent>
+                            <MudBadge Color="Color.Primary"
+                                      Content="@context.Interns.Count"
+                                      Style="cursor: pointer"
+                                      @onclick="(()=> GetInterns(context.Interns))" />
+                        </ActivatorContent>
+                        <ChildContent>
+                            @foreach (var intern in AvailableInterns)
+                            {
+                                <MudMenuItem @onclick="(()=> OpenInternDialogAsync(intern))">@intern.FullName</MudMenuItem>
+                            }
+                        </ChildContent>
+                    </MudMenu>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => UpdateInternshipDialogAsync(context))" />
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudSelect T="int" Immediate="true" ValueChanged="@((x) => OnPageSizeChanged(x))">
+                    <MudSelectItem Value="5">5</MudSelectItem>
+                    <MudSelectItem Value="10">10</MudSelectItem>
+                    <MudSelectItem Value="25">25</MudSelectItem>
+                </MudSelect>
+
+                <MudPagination Color="Color.Primary" Count="PageCount" SelectedChanged="@OnPageChanged" />
+            </PagerContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code{
+    private List<Internship> Internships = new();
+
+    private List<InternForList?> AvailableInterns = new();
+
+    private string? Filter { get; set; }
+
+    private string? OrderBy { get; set; }
+
+    private bool? SortDirection { get; set; }
+
+    private int Page = 1;
+
+    private int PageSize { get; set; } = 5;
+
+    private int PageCount { get; set; }
+
+    private IEnumerable<Guid> selectedInternsForInternship = new List<Guid>();
+
+    private string? SortDirectionString
+    {
+        get
+        {
+            if (SortDirection == null) return null;
+            return SortDirection.Value ? "1" : "0";
+        }
+        set => SortDirection = SortDirectionString == "1";
+    }
+
+    private async Task OnPageSizeChanged(int newPageSize)
+    {
+        PageSize = newPageSize;
+        await LoadData();
+    }
+
+    private async Task OnPageChanged(int newPage)
+    {
+        Page = newPage;
+        await LoadData();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Name", out var name))
+            Filter = name.First();
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("OrderBy", out var orderBy))
+            OrderBy = orderBy.First();
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("SortDirection", out var sortDirection))
+            SortDirectionString = sortDirection.First();
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Page", out var page))
+            Page = int.Parse(page.First());
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("PageSize", out var pageSize))
+            PageSize = int.Parse(pageSize.First());
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var queryParams = new Dictionary<string, string>();
+        if (!string.IsNullOrEmpty(Filter))
+            queryParams["Name"] = Filter;
+        if (!string.IsNullOrEmpty(OrderBy))
+            queryParams["OrderBy"] = OrderBy;
+        if (!string.IsNullOrEmpty(SortDirectionString))
+            queryParams["SortDirection"] = SortDirectionString;
+        if (!string.IsNullOrEmpty(Page.ToString()))
+            queryParams["Page"] = Page.ToString();
+        if (!string.IsNullOrEmpty(PageSize.ToString()))
+            queryParams["PageSize"] = PageSize.ToString();
+
+        Navigation.NavigateTo(QueryHelpers.AddQueryString("/entities", queryParams));
+
+
+        var response = await Http.GetFromJsonAsync<PagedInternships>(QueryHelpers.AddQueryString("api/Internship/GetAll", queryParams));
+        PageCount = (response.TotalCount + PageSize - 1) / PageSize;
+        Internships = response.Internships;
+    }
+
+    private async Task GetInterns(List<Guid> internIds)
+    {
+        var interns = new List<InternForList?>();
+        foreach (var id in internIds)
+            interns.Add(await Http.GetFromJsonAsync<InternForList>($"api/Intern/GetById/{id}"));
+
+        AvailableInterns = interns;
+    }
+
+    private Task OpenInternDialogAsync(InternForList intern)
+    {
+
+        var currentIntern = new Intern
+        {
+            Id = intern.Id,
+            FirstName = intern.FullName.Split(' ')[0],
+            LastName = intern.FullName.Split(' ')[1],
+            Gender = intern.Gender.ToString(),
+            Email = intern.Email,
+            PhoneNumber = intern.PhoneNumber,
+            BirthDate = intern.BirthDate,
+            Internship = intern.Internship.Name,
+            Project = intern.Project.Name
+        };
+
+        var parameters = new DialogParameters<EditDialog> { { x => x.Intern, currentIntern } };
+
+        return DialogService.ShowAsync<EditDialog>("Simple Dialog", parameters);
+    }
+
+    private Task CreateInternshipDialogAsync(Internship internship)
+    {
+        var parameters = new DialogParameters<InternshipEditDialog> { { x => x.Internship, internship },
+            { x => x.SubmitAction, HandleCreate }, { x => x.ShowInternshipId, false } };
+
+        return DialogService.ShowAsync<InternshipEditDialog>("Добавить направление", parameters);
+    }
+
+    private Task UpdateInternshipDialogAsync(Internship internship)
+    {
+        var parameters = new DialogParameters<InternshipEditDialog> { { x => x.Internship, internship },
+            { x => x.SubmitAction, HandleUpdate }, { x => x.ShowInternshipId, true} };
+
+        return DialogService.ShowAsync<InternshipEditDialog>("Обновить направление", parameters);
+    }
+
+    private async Task<HttpResponseMessage> HandleCreate(Internship internship)
+    {
+        var id = internship.Id;
+        internship.Id = Guid.Empty;
+        var response = await Http.PostAsJsonAsync($"api/Internship/Create", internship);
+        return response;
+    }
+
+    private async Task<HttpResponseMessage> HandleUpdate(Internship internship)
+    {
+        var id = internship.Id;
+        internship.Id = Guid.Empty;
+        var response = await Http.PostAsJsonAsync($"api/Internship/Create", internship);
+        return response;
+    }
+}

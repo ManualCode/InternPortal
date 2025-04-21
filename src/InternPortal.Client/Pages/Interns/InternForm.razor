@@ -1,0 +1,153 @@
+﻿@using InternPortal.Client.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<EditForm Model="@Intern" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @if (ShowInternId)
+    {
+        <div class="form-group" read>
+            <label for="id" >Id *</label>
+            <InputText id="firstName" @bind-Value="IdString" class="form-control" ReadOnly="true"/>
+            <ValidationMessage For="@(() => Intern.Id)" />
+        </div>
+    }
+
+    <div class="form-group">
+        <label for="firstName">Имя *</label>
+        <InputText id="firstName" @bind-Value="Intern.FirstName" class="form-control" />
+        <ValidationMessage For="@(() => Intern.FirstName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="lastName">Фамилия *</label>
+        <InputText id="lastName" @bind-Value="Intern.LastName" class="form-control" />
+        <ValidationMessage For="@(() => Intern.LastName)" />
+    </div>
+
+    <div class="form-group">
+        <MudRadioGroup @bind-Value="Intern.Gender">
+            <MudRadio Value="@(Gender.Мужчина.ToString())" Color="Color.Primary" Dense="true">Мужчина</MudRadio>
+            <MudRadio Value="@(Gender.Женщина.ToString())" Color="Color.Primary" Dense="false">Женщина</MudRadio>
+        </MudRadioGroup>
+        <ValidationMessage For="@(() => Intern.Gender)" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email *</label>
+        <InputText id="email" @bind-Value="Intern.Email" class="form-control" />
+        <ValidationMessage For="@(() => Intern.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="phone">Телефон</label>
+        <InputText id="phone" @bind-Value="Intern.PhoneNumber" class="form-control" placeholder="+7**********" />
+        <ValidationMessage For="@(() => Intern.PhoneNumber)" />
+    </div>
+
+    <div class="form-group">
+        <label for="birthDate">Дата рождения *</label>
+        <MudDatePicker Editable="true" @bind-Date="Intern.BirthDate" />
+        <ValidationMessage For="@(() => Intern.BirthDate)" />
+    </div>
+
+    <div class="form-group">
+        <label for="direction">Направление *</label>
+        <div class="d-flex">
+            <MudAutocomplete T="string"
+                             @bind-Value="Intern.Internship"
+                             SearchFunc="@GetInternships"
+                             CoerceText="true"
+                             ResetValueOnEmptyText="true"
+                             CoerceValue="true">
+            </MudAutocomplete>
+        </div>
+        <ValidationMessage For="@(() => Intern.Internship)" />
+    </div>
+
+    <div class="form-group">
+        <label for="project">Проект *</label>
+        <div class="d-flex">
+            <MudAutocomplete T="string"
+                             @bind-Value="Intern.Project"
+                             SearchFunc="@GetProjects"
+                             CoerceText="true"
+                             ResetValueOnEmptyText="true"
+                             CoerceValue="true">
+            </MudAutocomplete>
+        </div>
+        <ValidationMessage For="@(() => Intern.Internship)" />
+    </div>
+
+
+        <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
+        <button type="button" class="btn btn-outline-secondary mt-3 ms-2" @onclick="Cancel">Отмена</button>
+    
+</EditForm>
+
+@code {
+    [Parameter]
+    public bool ShowInternId { get; set; } = false;
+
+    [Parameter]
+    public Func<Intern, Task<HttpResponseMessage>> SubmitAction { get; set; }
+
+    [Parameter]
+    public Intern Intern { get; set; } = new();
+
+    private string IdString
+    {
+        get => Intern.Id.ToString();
+        set => Intern.Id = Guid.TryParse(value, out var guid) ? guid : Guid.Empty;
+    }
+
+    private List<string> Internships { get; set; } = new();
+    private List<string>? ProjectNames { get; set; } = new();
+
+    private async Task<IEnumerable<string>> GetInternships(string value, CancellationToken token)
+    {
+        if (string.IsNullOrEmpty(value))
+            return Internships;
+
+        return Internships.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task<IEnumerable<string>> GetProjects(string value, CancellationToken token)
+    {
+        if (string.IsNullOrEmpty(value))
+            return ProjectNames;
+
+        return ProjectNames.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Internships = (await Http.GetFromJsonAsync<PagedInternships>("/api/Internship/GetAll")).Internships.Select(x => x.Name).ToList();
+        ProjectNames = (await Http.GetFromJsonAsync<List<Project>>("/api/Project/GetAll")).Select(x => x.Name).ToList();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Intern.BirthDate = DateTime.SpecifyKind((DateTime)Intern.BirthDate, DateTimeKind.Utc);
+        var response = await SubmitAction(Intern);
+
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/interns/create");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Ошибка: {errorMessage}");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/interns/create");
+
+    }
+}

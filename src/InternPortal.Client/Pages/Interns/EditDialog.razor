@@ -1,0 +1,38 @@
+﻿@using InternPortal.Client.Models
+@inject HttpClient Http
+
+<MudDialog>
+    <TitleContent>
+        Dialog Title
+    </TitleContent>
+    <DialogContent>
+       <InternForm 
+            Intern="Intern" 
+            SubmitAction="HandleUpdate" 
+            ShowInternId="true"/>
+    </DialogContent>
+    <DialogActions>
+        @*<MudButton OnClick="Cancel">Cancel</MudButton>*@
+        @*<MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>*@
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Intern Intern { get; set; } = new();
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task<HttpResponseMessage> HandleUpdate(Intern intern)
+    {
+        var id = intern.Id;
+        intern.Id = Guid.Empty;
+        var response = await Http.PutAsJsonAsync($"api/Intern/Update/{id}", intern);
+        return response;
+    }
+
+}

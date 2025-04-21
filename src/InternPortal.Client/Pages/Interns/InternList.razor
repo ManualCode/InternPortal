@@ -4,6 +4,7 @@
 @inject NavigationManager Navigation
 @using InternPortal.Client.Models
 @inject HttpClient Http
+@inject IDialogService DialogService
 
 
 <MudCard>
@@ -39,6 +40,7 @@
     <HeaderContent>
         <MudTh>ФИО</MudTh>
         <MudTh>Дата рождения</MudTh>
+        <MudTh>Пол</MudTh>
         <MudTh>Email</MudTh>
         <MudTh>Номер</MudTh>
         <MudTh>Направление</MudTh>
@@ -48,6 +50,7 @@
     <RowTemplate>
         <MudTd DataLabel="ФИО">@context.FullName</MudTd>
         <MudTd DataLabel="Дата рождения">@context.BirthDate.ToShortDateString()</MudTd>
+        <MudTd DataLabel="Пол">@context.Gender.ToString()</MudTd>
         <MudTd DataLabel="Email">@context.Email</MudTd>
         <MudTd DataLabel="Номер">@context.PhoneNumber</MudTd>
         <MudTd DataLabel="Направление">@context.Internship.Name</MudTd>
@@ -55,33 +58,35 @@
         <MudTd DataLabel="Редактировать">
             <MudIconButton Icon="@Icons.Material.Filled.Edit"
                            Color="Color.Primary"
-                           OnClick="@(() => ShowEditDialog(context))" />
+                           OnClick="@(() => OpenDialogAsync(context))" />
         </MudTd>
     </RowTemplate>
 </MudTable>
 
 
-
-<MudDialog @bind-IsVisible="isEditDialogVisible" MaxWidth="MaxWidth.Medium">
-    <DialogContent>
-        <EditForm Model="@CurrentIntern" OnValidSubmit="@SaveIntern">
-            <DataAnnotationsValidator />
-
-            <MudTextField Label="Имя" @bind-Value="CurrentIntern.FirstName" />
-            <MudTextField Label="Фамилия" @bind-Value="CurrentIntern.LastName" />
-            <MudSelect Label="Направление" @bind-Value="CurrentIntern.Internship">
-                @foreach (var dir in AvailableInternships)
-                {
-                    <MudSelectItem Value="@dir">@dir</MudSelectItem>
-                }
-            </MudSelect>
-
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled">Сохранить</MudButton>
-        </EditForm>
-    </DialogContent>
-</MudDialog>
-
 @code {
+    private Intern CurrentIntern = new();
+
+    private Task OpenDialogAsync(InternForList intern)
+    {
+
+        CurrentIntern = new Intern
+        {
+            Id = intern.Id,
+            FirstName = intern.FullName.Split(' ')[0],
+            LastName = intern.FullName.Split(' ')[1],
+            Gender = intern.Gender.ToString(),
+            Email = intern.Email,
+            PhoneNumber = intern.PhoneNumber,
+            BirthDate = intern.BirthDate,
+            Internship = intern.Internship.Name,
+            Project = intern.Project.Name
+        };
+        var parameters = new DialogParameters<EditDialog> { { x => x.Intern, CurrentIntern } };
+
+        return DialogService.ShowAsync<EditDialog>("Simple Dialog", parameters);
+    }
+
     private List<InternForList> AllInterns = new();
     private List<InternForList> FilteredInterns = new();
     private List<string> AvailableInternships = new();
@@ -132,36 +137,5 @@
         SelectedProject = null;
         FilteredInterns = AllInterns;
         Navigation.NavigateTo("/interns");
-    }
-
-
-
-
-    private bool isEditDialogVisible;
-    private Intern CurrentIntern = new();
-
-
-    private async void ShowEditDialog(InternForList intern)
-    {
-        Console.WriteLine("wwwwwww");
-        CurrentIntern = await Http.GetFromJsonAsync<Intern>($"api/Intern/GetById/{intern.Id}") ?? new();
-        isEditDialogVisible = true;
-    }
-
-    private async Task SaveIntern()
-    {
-        try
-        {
-            var response = await Http.PutAsJsonAsync($"api/Intern/Add", CurrentIntern);
-            if (response.IsSuccessStatusCode)
-            {
-                //await LoadInterns(); // Перезагружаем список
-                isEditDialogVisible = false;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка: {ex.Message}", Severity.Error);
-        }
     }
 }
