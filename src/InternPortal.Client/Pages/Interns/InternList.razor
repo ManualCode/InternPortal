@@ -7,11 +7,12 @@
 @inject IDialogService DialogService
 
 
-<MudCard>
+<MudCard Class="mb-4">
     <MudCardContent>
-        <MudGrid>
+        <MudGrid Justify="Justify.FlexStart" Spacing="2">
             <MudItem xs="12" sm="6" md="4">
                 <MudSelect T="string" Label="Направление" @bind-Value="SelectedInternship"
+                           Variant="Variant.Outlined" Margin="Margin.Dense"
                            AnchorOrigin="Origin.BottomCenter" Clearable="true">
                     @foreach (var internship in AvailableInternships)
                     {
@@ -21,6 +22,7 @@
             </MudItem>
             <MudItem xs="12" sm="6" md="4">
                 <MudSelect T="string" Label="Проект" @bind-Value="SelectedProject"
+                           Variant="Variant.Outlined" Margin="Margin.Dense"
                            AnchorOrigin="Origin.BottomCenter" Clearable="true">
                     @foreach (var project in AvailableProjects)
                     {
@@ -29,39 +31,52 @@
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" sm="6" md="4" Class="d-flex align-center">
-                <MudButton OnClick="ApplyFilters" Class="ml-auto">Применить</MudButton>
-                <MudButton OnClick="ResetFilters" Class="ml-2">Сбросить</MudButton>
+                <MudButton OnClick="ApplyFilters" Variant="Variant.Filled"
+                           Color="Color.Primary" Class="ml-auto" EndIcon="@Icons.Material.Filled.Search">
+                    Применить
+                </MudButton>
+                <MudButton OnClick="ResetFilters" Variant="Variant.Text"
+                           Color="Color.Secondary" Class="ml-2" EndIcon="@Icons.Material.Filled.Clear">
+                    Сбросить
+                </MudButton>
             </MudItem>
         </MudGrid>
     </MudCardContent>
 </MudCard>
 
-<MudTable Items="@FilteredInterns" Hover="true" Breakpoint="Breakpoint.None">
-    <HeaderContent>
-        <MudTh>ФИО</MudTh>
-        <MudTh>Дата рождения</MudTh>
-        <MudTh>Пол</MudTh>
-        <MudTh>Email</MudTh>
-        <MudTh>Номер</MudTh>
-        <MudTh>Направление</MudTh>
-        <MudTh>Проект</MudTh>
-        <MudTh>Редактировать</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="ФИО">@context.FullName</MudTd>
-        <MudTd DataLabel="Дата рождения">@context.BirthDate.ToShortDateString()</MudTd>
-        <MudTd DataLabel="Пол">@context.Gender.ToString()</MudTd>
-        <MudTd DataLabel="Email">@context.Email</MudTd>
-        <MudTd DataLabel="Номер">@context.PhoneNumber</MudTd>
-        <MudTd DataLabel="Направление">@context.Internship.Name</MudTd>
-        <MudTd DataLabel="Проект">@context.Project.Name</MudTd>
-        <MudTd DataLabel="Редактировать">
-            <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                           Color="Color.Primary"
-                           OnClick="@(() => OpenDialogAsync(context))" />
-        </MudTd>
-    </RowTemplate>
-</MudTable>
+<MudPaper Elevation="3" Class="pa-4">
+    <MudTable Items="@FilteredInterns" Hover="true" Striped="true" Bordered="true"
+              Dense="true" Breakpoint="Breakpoint.None" Class="rounded-lg">
+        <HeaderContent>
+            <MudTh Style="width: 15%;">ФИО</MudTh>
+            <MudTh Style="width: 10%;">Дата рождения</MudTh>
+            <MudTh Style="width: 8%;">Пол</MudTh>
+            <MudTh Style="width: 15%;">Email</MudTh>
+            <MudTh Style="width: 12%;">Номер</MudTh>
+            <MudTh Style="width: 15%;">Направление</MudTh>
+            <MudTh Style="width: 15%;">Проект</MudTh>
+            <MudTh Style="width: 10%; text-align: center;">Действия</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ФИО" Class="font-weight-bold">@context.FullName</MudTd>
+            <MudTd DataLabel="Дата рождения">@context.BirthDate.ToString("dd.MM.yyyy")</MudTd>
+            <MudTd DataLabel="Пол">@context.Gender.ToString()</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Номер">@context.PhoneNumber</MudTd>
+            <MudTd DataLabel="Направление">@context.Internship.Name</MudTd>
+            <MudTd DataLabel="Проект">@context.Project.Name</MudTd>
+            <MudTd DataLabel="Действие" Style="text-align: center;">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary"
+                               Title="Редактировать"
+                               OnClick="@(() => OpenDialogAsync(context))"/>
+            </MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText Align="Align.Center" Typo="Typo.h6" Class="my-4">Нет данных для отображения</MudText>
+        </NoRecordsContent>
+    </MudTable>
+</MudPaper>
 
 
 @code {

@@ -1,11 +1,24 @@
-﻿@using InternPortal.Client.Models
-@inject HttpClient Http
+﻿@page "/"
+@using InternPortal.Client.Models
 @inject NavigationManager Navigation
+@inject HttpClient Http
 
-@page "/interns/create"
 
-<h3>Добавить нового стажера</h3>
-<InternForm SubmitAction="HandleCreate" />
+<MudPaper Class="pa-8 ma-4" Elevation="5">
+    <MudGrid>
+        <MudItem xs="12" class="d-flex align-center">
+            <MudText Typo="Typo.h4" Class="mb-4">Добавление нового стажёра</MudText>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudCard Class="pa-4">
+                <MudCardContent>
+                    <InternForm SubmitAction="HandleCreate" />
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
 
 @code{
     private async Task<HttpResponseMessage> HandleCreate(Intern newIntern)

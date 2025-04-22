@@ -27,7 +27,7 @@ namespace InternPortal.Infrastructure.Extensions
         public static IQueryable<InternshipEntity> Filter(this IQueryable<InternshipEntity> query, BaseFilter internshipFilter)
         {
             if (internshipFilter is not null && !string.IsNullOrWhiteSpace(internshipFilter.Name))
-                query = query.Where(x => x.Name.ToLower() == internshipFilter.Name.ToLower());
+                query = query.Where(x => x.Name.ToLower().Contains(internshipFilter.Name.ToLower()));
 
             return query;
         }

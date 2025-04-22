@@ -22,8 +22,8 @@ namespace InternPortal.API.Controllers
             //плохо
             var internshipsCount = (await internshipService.GetAllInternships(filter, sort, null)).Count;
 
-            var p = new PagedInternshipResponse(internshipsCount, internships.Select(Mapping.Mapper.Map<InternshipResponse>).ToList());
-            return Ok(p);
+            return Ok(new PagedInternshipResponse(internshipsCount,
+                internships.Select(Mapping.Mapper.Map<InternshipResponse>).ToList()));
         }
 
         [HttpGet("{id:guid}")]

@@ -1,12 +1,14 @@
-﻿using InternPortal.Shared.Contracts.Intern.Responses;
-
-
-namespace InternPortal.Shared.Contracts.Project.Responses
+﻿namespace InternPortal.Shared.Contracts.Project.Responses
 {
     public sealed record ProjectResponse(
     Guid Id,
     string Name,
-    List<Guid> InternIds,
+    List<Guid> Interns,
     DateTime CreateAt,
     DateTime UpdateAt);
+
+    public sealed record PagedProjectResponse(
+
+       int TotalCount,
+       List<ProjectResponse> Projects);
 }

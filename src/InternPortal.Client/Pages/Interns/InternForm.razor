@@ -1,91 +1,137 @@
 ﻿@using InternPortal.Client.Models
-@inject HttpClient Http
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject HttpClient Http
 
-<EditForm Model="@Intern" OnValidSubmit="@HandleValidSubmit">
+
+<EditForm Model="@Intern" OnValidSubmit="@HandleValidSubmit" class="pa-4">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    @if (ShowInternId)
-    {
-        <div class="form-group" read>
-            <label for="id" >Id *</label>
-            <InputText id="firstName" @bind-Value="IdString" class="form-control" ReadOnly="true"/>
-            <ValidationMessage For="@(() => Intern.Id)" />
-        </div>
-    }
+    <MudGrid>
+        @if (ShowInternId)
+        {
+            <MudItem xs="12" md="6" class="pa-2">
+                <MudTextField Label="Id"
+                              @bind-Value="IdString"
+                              Variant="Variant.Outlined"
+                              ReadOnly="true"
+                              Class="full-width" />
+            </MudItem>
+        }
 
-    <div class="form-group">
-        <label for="firstName">Имя *</label>
-        <InputText id="firstName" @bind-Value="Intern.FirstName" class="form-control" />
-        <ValidationMessage For="@(() => Intern.FirstName)" />
-    </div>
+        <MudItem xs="12" md="6" class="pa-2">
+            <MudTextField Label="Имя"
+                          @bind-Value="Intern.FirstName"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          Class="full-width"
+                          For="@(() => Intern.FirstName)" />
+        </MudItem>
 
-    <div class="form-group">
-        <label for="lastName">Фамилия *</label>
-        <InputText id="lastName" @bind-Value="Intern.LastName" class="form-control" />
-        <ValidationMessage For="@(() => Intern.LastName)" />
-    </div>
+        <MudItem xs="12" md="6" class="pa-2">
+            <MudTextField Label="Фамилия"
+                          @bind-Value="Intern.LastName"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          Class="full-width"
+                          For="@(() => Intern.LastName)" />
+        </MudItem>
 
-    <div class="form-group">
-        <MudRadioGroup @bind-Value="Intern.Gender">
-            <MudRadio Value="@(Gender.Мужчина.ToString())" Color="Color.Primary" Dense="true">Мужчина</MudRadio>
-            <MudRadio Value="@(Gender.Женщина.ToString())" Color="Color.Primary" Dense="false">Женщина</MudRadio>
-        </MudRadioGroup>
-        <ValidationMessage For="@(() => Intern.Gender)" />
-    </div>
+        <MudItem xs="12" md="6" class="pa-2">
+            <MudSelect Label="Пол"
+                       For="@(() => Intern.Gender)"
+                       @bind-Value="Intern.Gender"
+                       Variant="Variant.Outlined"
+                       Required="true"
+                       Class="full-width">
+                <MudSelectItem Value="@(Gender.Мужчина.ToString())">Мужчина</MudSelectItem>
+                <MudSelectItem Value="@(Gender.Женщина.ToString())">Женщина</MudSelectItem>
+            </MudSelect>
+        </MudItem>
 
-    <div class="form-group">
-        <label for="email">Email *</label>
-        <InputText id="email" @bind-Value="Intern.Email" class="form-control" />
-        <ValidationMessage For="@(() => Intern.Email)" />
-    </div>
+        <MudItem xs="12" md="6" class="pa-2">
+            <MudTextField Label="Email"
+                          @bind-Value="Intern.Email"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          Class="full-width"
+                          For="@(() => Intern.Email)" />
+        </MudItem>
 
-    <div class="form-group">
-        <label for="phone">Телефон</label>
-        <InputText id="phone" @bind-Value="Intern.PhoneNumber" class="form-control" placeholder="+7**********" />
-        <ValidationMessage For="@(() => Intern.PhoneNumber)" />
-    </div>
+        <MudItem xs="12" md="6" class="pa-2">
+            <MudTextField Label="Телефон"
+                          @bind-Value="Intern.PhoneNumber"
+                          Variant="Variant.Outlined"
+                          Class="full-width"
+                          InputMask="+7 000 000-00-00"
+                          HelperText="Формат: +7 XXX XXX-XX-XX"
+                          For="@(() => Intern.PhoneNumber)" />
+        </MudItem>
 
-    <div class="form-group">
-        <label for="birthDate">Дата рождения *</label>
-        <MudDatePicker Editable="true" @bind-Date="Intern.BirthDate" />
-        <ValidationMessage For="@(() => Intern.BirthDate)" />
-    </div>
+        <MudItem xs="12" md="6" class="pa-2">
+            <MudDatePicker Label="Дата рождения"
+                           @bind-Date="Intern.BirthDate"
+                           Variant="Variant.Outlined"
+                           Required="true"
+                           Editable="true"
+                           Class="full-width" />
+        </MudItem>
 
-    <div class="form-group">
-        <label for="direction">Направление *</label>
-        <div class="d-flex">
-            <MudAutocomplete T="string"
+        <MudItem xs="12" md="6" class="pa-2">
+            <MudAutocomplete Label="Направление"
+                             T="string"
                              @bind-Value="Intern.Internship"
+                             Variant="Variant.Outlined"
                              SearchFunc="@GetInternships"
                              CoerceText="true"
-                             ResetValueOnEmptyText="true"
-                             CoerceValue="true">
-            </MudAutocomplete>
-        </div>
-        <ValidationMessage For="@(() => Intern.Internship)" />
-    </div>
+                             Required="true"
+                             Class="full-width" />
+        </MudItem>
 
-    <div class="form-group">
-        <label for="project">Проект *</label>
-        <div class="d-flex">
-            <MudAutocomplete T="string"
+        <MudItem xs="12" md="6" class="pa-2">
+            <MudAutocomplete Label="Проект"
+                             T="string"
                              @bind-Value="Intern.Project"
+                             Variant="Variant.Outlined"
                              SearchFunc="@GetProjects"
                              CoerceText="true"
-                             ResetValueOnEmptyText="true"
-                             CoerceValue="true">
-            </MudAutocomplete>
-        </div>
-        <ValidationMessage For="@(() => Intern.Internship)" />
+                             Required="true"
+                             Class="full-width" />
+        </MudItem>
+    </MudGrid>
+
+    <div class="d-flex justify-end mt-4">
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Secondary"
+                   Class="mr-2"
+                   OnClick="Cancel">
+            Отмена
+        </MudButton>
+
+        @if (ShowInternId)
+        {
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Error"
+                       Class="mr-2"
+                       OnClick="() => Delete(Intern.Id)">
+                Удалить
+            </MudButton>
+        }
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   ButtonType="ButtonType.Submit">
+            Сохранить
+        </MudButton>
     </div>
-
-
-        <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
-        <button type="button" class="btn btn-outline-secondary mt-3 ms-2" @onclick="Cancel">Отмена</button>
-    
 </EditForm>
+
+<style>
+    .full-width {
+        width: 100%;
+    }
+</style>
 
 @code {
     [Parameter]
@@ -125,7 +171,7 @@
     protected override async Task OnInitializedAsync()
     {
         Internships = (await Http.GetFromJsonAsync<PagedInternships>("/api/Internship/GetAll")).Internships.Select(x => x.Name).ToList();
-        ProjectNames = (await Http.GetFromJsonAsync<List<Project>>("/api/Project/GetAll")).Select(x => x.Name).ToList();
+        ProjectNames = (await Http.GetFromJsonAsync<PagedProjects>("/api/Project/GetAll")).Projects.Select(x => x.Name).ToList();
     }
 
     private async Task HandleValidSubmit()
@@ -136,18 +182,43 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Navigation.NavigateTo("/interns/create");
+            Snackbar.Add("Запись успешно добавлена", Severity.Success);
+            if (ShowInternId)
+                Navigation.NavigateTo("/interns");
+            else
+                Navigation.NavigateTo("/");
+
         }
         else
         {
             var errorMessage = await response.Content.ReadAsStringAsync();
+            Snackbar.Add("Ошибка при добавлении", Severity.Error);
             Console.WriteLine($"Ошибка: {errorMessage}");
         }
     }
 
     private void Cancel()
     {
-        Navigation.NavigateTo("/interns/create");
+        if (ShowInternId)
+            Navigation.NavigateTo("/interns");
+        else
+            Navigation.NavigateTo("/");
 
+    }
+
+    private async Task Delete(Guid id)
+    {
+
+        var response = await Http.DeleteAsync($"/api/Intern/Delete/{id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Запись успешно сохранена", Severity.Success);
+            Navigation.NavigateTo("/interns");
+        }
+        else
+        {
+            Snackbar.Add("Ошибка при удалении", Severity.Error);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace InternPortal.Client.Models
 
         public string Name { get; set; }
 
-        public List<Guid> InternIds { get; set; }
+        public List<Guid> Interns { get; set; }
 
         public DateTime CreateAt { get; set; }
 

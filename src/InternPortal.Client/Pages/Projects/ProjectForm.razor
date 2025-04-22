@@ -1,0 +1,119 @@
+﻿@using InternPortal.Client.Models;
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject HttpClient Http
+
+
+<EditForm Model="@Project" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @if (ShowProjectId)
+    {
+        <div class="form-group" read>
+            <label for="id">Id *</label>
+            <InputText id="firstName" @bind-Value="IdString" class="form-control" ReadOnly="true" />
+            <ValidationMessage For="@(() => Project.Id)" />
+        </div>
+    }
+
+    <div class="form-group">
+        <label for="firstName">Имя *</label>
+        <InputText id="firstName" @bind-Value="Project.Name" class="form-control" />
+        <ValidationMessage For="@(() => Project.Name)" />
+    </div>
+
+    <MudSelect T="Guid"
+               Label="Выберите стажеров"
+               MultiSelection="true"
+               @bind-SelectedValues="selectedInternIds">
+        @foreach (var intern in Interns)
+        {
+            <MudSelectItem T="Guid"
+                           Value="@intern.Id"
+                           Disabled="@(selectedInternIds.Contains(intern.Id) && !CanDeselect)">
+                @intern.FullName
+            </MudSelectItem>
+        }
+    </MudSelect>
+
+    <button type="button" class="btn btn-outline-secondary mt-3 ms-2" @onclick="Cancel">Отмена</button>
+    @if (ShowProjectId)
+    {
+        <button type="button" class="btn btn-outline-danger mt-3 ms-2" @onclick="() => Delete(Project.Id)">Удалить</button>
+    }
+    <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Project Project { get; set; } = new();
+
+    [Parameter]
+    public bool ShowProjectId { get; set; } = false;
+
+    [Parameter]
+    public Func<Project, Task<HttpResponseMessage>> SubmitAction { get; set; }
+
+    private List<InternForList> Interns { get; set; } = new();
+
+    private IEnumerable<Guid> selectedInternIds = new HashSet<Guid>();
+
+    private bool CanDeselect = false;
+
+    private string IdString
+    {
+        get => Project.Id.ToString();
+        set => Project.Id = Guid.TryParse(value, out var guid) ? guid : Guid.Empty;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Interns = await Http.GetFromJsonAsync<List<InternForList>>("/api/Intern/GetAll");
+        if (ShowProjectId)
+            selectedInternIds = Project.Interns;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Project.Interns = selectedInternIds.ToList();
+        var response = await SubmitAction(Project);
+
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/entities");
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Ошибка: {errorMessage}");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/entities");
+    }
+
+    private async Task Delete(Guid id)
+    {
+
+        var response = await Http.DeleteAsync($"/api/Project/DeleteById/{id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Запись успешно удалена", Severity.Success);
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+
+            var firstLine = errorContent.Split('\n').FirstOrDefault()?.Trim();
+
+            var cleanMessage = firstLine?.Replace("System.Exception: ", "");
+
+            Snackbar.Add(cleanMessage ?? "Неизвестная ошибка", Severity.Error);
+        }
+    }
+}

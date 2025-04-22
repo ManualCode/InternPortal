@@ -12,6 +12,7 @@ namespace InternPortal.Infrastructure.Extensions
     {
         public static IQueryable<ProjectEntity> Page(this IQueryable<ProjectEntity> query, PageParams pageParams)
         {
+            if (pageParams == null) return query;
             var page = pageParams.Page ?? 1;
             var pageSize = pageParams.PageSize ?? 10;
 
@@ -22,7 +23,7 @@ namespace InternPortal.Infrastructure.Extensions
         public static IQueryable<ProjectEntity> Filter(this IQueryable<ProjectEntity> query, BaseFilter ProjectFilter)
         {
             if (ProjectFilter is not null && !string.IsNullOrWhiteSpace(ProjectFilter.Name))
-                query = query.Where(x => x.Name.ToLower() == ProjectFilter.Name.ToLower());
+                query = query.Where(x => x.Name.ToLower().Contains(ProjectFilter.Name.ToLower()));
 
             return query;
         }

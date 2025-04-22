@@ -2,89 +2,155 @@
 @using InternPortal.Client.Models
 @inject NavigationManager Navigation
 @inject HttpClient Http
+@using MudBlazor
 @using InternPortal.Client.Pages.Interns
 @inject IDialogService DialogService
 @using InternPortal.Client.Pages.Internships
 
 
-<MudCard>
-    <MudCardContent>
-        <MudGrid>
-            <MudItem xs="12" sm="6" Class="d-flex justify-end">
-                <MudTextField @bind-Value="Filter"
-                              Label="Поиск по названию"
-                              Immediate="true"
-                              Adornment="Adornment.Start" />
+<MudPaper Elevation="10" Class="pa-4 ma-4 rounded-lg">
+    <MudCard Style="border-radius: 12px;">
+        <MudCardContent>
+            <MudGrid Class="mb-4" Spacing="2">
+                <MudItem xs="12" sm="8" md="9">
+                    <MudGrid Spacing="2">
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudTextField Value="@Filter"
+                                          Label="Поиск по названию"
+                                          Variant="Variant.Outlined"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          Class="full-width"
+                                          ValueChanged="@((string filter) => OnFilterChanged(filter))"/>
+                        </MudItem>
 
-                <MudSelect @bind-Value="OrderBy" Label="Сортировать по" Adornment="Adornment.Start">
-                    <MudSelectItem Value='"Name"'>Название</MudSelectItem>
-                    <MudSelectItem Value='"Interns"'>Количество стажёров</MudSelectItem>
-                </MudSelect>
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudSelect Value="@OrderBy"
+                                       Label="Сортировать по"
+                                       Variant="Variant.Outlined"
+                                       Adornment="Adornment.Start"
+                                       AdornmentIcon="@Icons.Material.Filled.Sort"
+                                       ValueChanged="@((string orderBy) => OnOrderByChanged(orderBy))"
+                                       Clearable="true"
+                                       Class="full-width">
+                                <MudSelectItem Value='"Name"'>Название</MudSelectItem>
+                                <MudSelectItem Value='"Interns"'>Количество стажёров</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
 
-                <MudCheckBox IndeterminateIcon="@MudBlazor.Icons.Material.Filled.CheckBoxOutlineBlank"
-                             LabelPlacement="Placement.Start"
-                             @bind-Value="SortDirection"
-                             Color="Color.Primary"
-                             Label="По убыванию" />
+                        <MudItem xs="12" sm="6" md="4" Class="d-flex align-center">
+                            <MudCheckBox Label="По убыванию"
+                                         T="bool?"
+                                         LabelPlacement="Placement.End"
+                                         Value="@SortDirection"
+                                         Color="Color.Primary"
+                                         ValueChanged="@((bool? sortDirection) => OnSortDirectionChanged(sortDirection))"
+                                         Class="ml-2" />
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
 
-                <MudIconButton Icon="@Icons.Material.Filled.Search"
+                <MudItem xs="12" sm="4" md="3" Class="d-flex justify-end align-center">
+                    <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
-                               OnClick="LoadData" />
-            </MudItem>
-            <MudItem xs="12" sm="6" Class="d-flex justify-end">
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           OnClick="(()=> CreateInternshipDialogAsync(new Internship()))">
-                    Добавить направление
-                </MudButton>
-            </MudItem>
-        </MudGrid>
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="(()=> CreateDialogAsync(new Project()))"
+                               Class="ml-auto">
+                        Добавить проект
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
 
-        <MudTable Items="@Internships" Hover="true" RowsPerPage="@PageSize">
-            <HeaderContent>
-                <MudTh>Название</MudTh>
-                <MudTh>Количество стажеров</MudTh>
-                <MudTh>Действия</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd>@context.Name</MudTd>
-                <MudTd>
-                    <MudMenu>
-                        <ActivatorContent>
-                            <MudBadge Color="Color.Primary"
-                                      Content="@context.Interns.Count"
-                                      Style="cursor: pointer"
-                                      @onclick="(()=> GetInterns(context.Interns))" />
-                        </ActivatorContent>
-                        <ChildContent>
-                            @foreach (var intern in AvailableInterns)
-                            {
-                                <MudMenuItem @onclick="(()=> OpenInternDialogAsync(intern))">@intern.FullName</MudMenuItem>
-                            }
-                        </ChildContent>
-                    </MudMenu>
-                </MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                   Color="Color.Primary"
-                                   OnClick="@(() => UpdateInternshipDialogAsync(context))" />
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudSelect T="int" Immediate="true" ValueChanged="@((x) => OnPageSizeChanged(x))">
-                    <MudSelectItem Value="5">5</MudSelectItem>
-                    <MudSelectItem Value="10">10</MudSelectItem>
-                    <MudSelectItem Value="25">25</MudSelectItem>
-                </MudSelect>
+            <MudTable Items="@Project"
+                      Hover="true"
+                      Striped="true"
+                      Bordered="true"
+                      Elevation="5"
+                      RowsPerPage="@PageSize"
+                      Class="rounded-lg">
 
-                <MudPagination Color="Color.Primary" Count="PageCount" SelectedChanged="@OnPageChanged" />
-            </PagerContent>
-        </MudTable>
-    </MudCardContent>
-</MudCard>
+                <HeaderContent>
+                    <MudTh>Название</MudTh>
+                    <MudTh>Стажёры</MudTh>
+                    <MudTh>Действия</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Название">
+                        <MudText Typo="Typo.body1">@context.Name</MudText>
+                    </MudTd>
+
+                    <MudTd DataLabel="Стажёры">
+                        <MudMenu Direction="Direction.Bottom" OffsetY="true">
+                            <ActivatorContent>
+                                <MudBadge Color="Color.Primary"
+                                          Content="@context.Interns.Count"
+                                          Style="cursor: pointer"
+                                          Class="ma-2" />
+                            </ActivatorContent>
+                            <ChildContent>
+                                @if (context.Interns.Any())
+                                {
+                                    @foreach (var intern in AvailableInterns)
+                                    {
+                                        <MudMenuItem @onclick="(() => OpenInternDialogAsync(intern))">@intern.FullName</MudMenuItem>
+                                    }
+                                }
+                                else
+                                {
+                                    <MudMenuItem Disabled="true">Нет стажёров</MudMenuItem>
+                                }
+                            </ChildContent>
+                        </MudMenu>
+                    </MudTd>
+
+                    <MudTd DataLabel="Действиt">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Primary"
+                                       OnClick="@(() => UpdateDialogAsync(context))" />
+                    </MudTd>
+                </RowTemplate>
+
+                <PagerContent>
+                    <MudContainer Class="d-flex align-center justify-end mt-4" Style="gap: 16px;">
+                        <MudText Typo="Typo.caption">Элементов на странице:</MudText>
+                        <MudSelect T="int" Value="@PageSize" Immediate="true" Variant="Variant.Outlined"
+                                   ValueChanged="@OnPageSizeChanged" Class="flex-none" Style="width: 80px">
+                            <MudSelectItem Value="5">5</MudSelectItem>
+                            <MudSelectItem Value="10">10</MudSelectItem>
+                            <MudSelectItem Value="25">25</MudSelectItem>
+                        </MudSelect>
+                        <MudPagination Count="@PageCount" SelectedChanged="@OnPageChanged"
+                                       Variant="Variant.Text" Color="Color.Primary" Class="flex-none" />
+
+                        <MudText Typo="Typo.body2">Перейти на:</MudText>
+
+                        <MudTextField Value="Page"
+                                      Variant="Variant.Outlined"
+                                      InputType="InputType.Number"
+                                      Immediate="true"
+                                      Class="flex-none"
+                                      Style="width: 80px"
+                                      ValueChanged="@((int newPage) => OnPageChanged(newPage))" />
+                    </MudContainer>
+                </PagerContent>
+            </MudTable>
+        </MudCardContent>
+    </MudCard>
+</MudPaper>
+
+<style>
+    .full-width {
+        width: 100%;
+    }
+
+    .mud-table-cell {
+        vertical-align: middle;
+    }
+</style>
 
 @code{
-    private List<Internship> Internships = new();
+    private List<Project> Project = new();
 
     private List<InternForList?> AvailableInterns = new();
 
@@ -92,9 +158,9 @@
 
     private string? OrderBy { get; set; }
 
-    private bool? SortDirection { get; set; }
+    private bool? SortDirection { get; set; } = false;
 
-    private int Page = 1;
+    private int Page { get; set; } = 1;
 
     private int PageSize { get; set; } = 5;
 
@@ -112,6 +178,24 @@
         set => SortDirection = SortDirectionString == "1";
     }
 
+    private async Task OnOrderByChanged(string orderBy)
+    {
+        OrderBy = orderBy;
+        await LoadData();
+    }
+
+    private async Task OnSortDirectionChanged(bool? sortDirection)
+    {
+        SortDirection = sortDirection;
+        await LoadData();
+    }
+
+    private async Task OnFilterChanged(string filter)
+    {
+        Filter = filter;
+        await LoadData();
+    }
+
     private async Task OnPageSizeChanged(int newPageSize)
     {
         PageSize = newPageSize;
@@ -127,15 +211,15 @@
     protected override async Task OnInitializedAsync()
     {
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Name", out var name))
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("name", out var name))
             Filter = name.First();
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("OrderBy", out var orderBy))
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("orderBy", out var orderBy))
             OrderBy = orderBy.First();
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("SortDirection", out var sortDirection))
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("sortDirection", out var sortDirection))
             SortDirectionString = sortDirection.First();
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Page", out var page))
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("page", out var page))
             Page = int.Parse(page.First());
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("PageSize", out var pageSize))
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("pageSize", out var pageSize))
             PageSize = int.Parse(pageSize.First());
 
         await LoadData();
@@ -144,23 +228,24 @@
     private async Task LoadData()
     {
         var queryParams = new Dictionary<string, string>();
+        queryParams["entity"] = "projects";
         if (!string.IsNullOrEmpty(Filter))
-            queryParams["Name"] = Filter;
+            queryParams["name"] = Filter;
         if (!string.IsNullOrEmpty(OrderBy))
-            queryParams["OrderBy"] = OrderBy;
+            queryParams["orderBy"] = OrderBy;
         if (!string.IsNullOrEmpty(SortDirectionString))
-            queryParams["SortDirection"] = SortDirectionString;
+            queryParams["sortDirection"] = SortDirectionString;
         if (!string.IsNullOrEmpty(Page.ToString()))
-            queryParams["Page"] = Page.ToString();
+            queryParams["page"] = Page.ToString();
         if (!string.IsNullOrEmpty(PageSize.ToString()))
-            queryParams["PageSize"] = PageSize.ToString();
+            queryParams["pageSize"] = PageSize.ToString();
 
         Navigation.NavigateTo(QueryHelpers.AddQueryString("/entities", queryParams));
 
 
-        var response = await Http.GetFromJsonAsync<PagedInternships>(QueryHelpers.AddQueryString("api/Internship/GetAll", queryParams));
+        var response = await Http.GetFromJsonAsync<PagedProjects>(QueryHelpers.AddQueryString("api/Project/GetAll", queryParams));
         PageCount = (response.TotalCount + PageSize - 1) / PageSize;
-        Internships = response.Internships;
+        Project = response.Projects;
     }
 
     private async Task GetInterns(List<Guid> internIds)
@@ -190,38 +275,38 @@
 
         var parameters = new DialogParameters<EditDialog> { { x => x.Intern, currentIntern } };
 
-        return DialogService.ShowAsync<EditDialog>("Simple Dialog", parameters);
+        return DialogService.ShowAsync<EditDialog>("Обновить стажёра", parameters);
     }
 
-    private Task CreateInternshipDialogAsync(Internship internship)
+    private Task CreateDialogAsync(Project internship)
     {
-        var parameters = new DialogParameters<InternshipEditDialog> { { x => x.Internship, internship },
-            { x => x.SubmitAction, HandleCreate }, { x => x.ShowInternshipId, false } };
+        var parameters = new DialogParameters<ProjectDialog> { { x => x.Project, internship },
+            { x => x.SubmitAction, HandleCreate }, { x => x.ShowProjectId, false } };
 
-        return DialogService.ShowAsync<InternshipEditDialog>("Добавить направление", parameters);
+        return DialogService.ShowAsync<ProjectDialog>("Добавить проект", parameters);
     }
 
-    private Task UpdateInternshipDialogAsync(Internship internship)
+    private Task UpdateDialogAsync(Project project)
     {
-        var parameters = new DialogParameters<InternshipEditDialog> { { x => x.Internship, internship },
-            { x => x.SubmitAction, HandleUpdate }, { x => x.ShowInternshipId, true} };
+        var parameters = new DialogParameters<ProjectDialog> { { x => x.Project, project },
+            { x => x.SubmitAction, HandleUpdate }, { x => x.ShowProjectId, true} };
 
-        return DialogService.ShowAsync<InternshipEditDialog>("Обновить направление", parameters);
+        return DialogService.ShowAsync<ProjectDialog>("Обновить проект", parameters);
     }
 
-    private async Task<HttpResponseMessage> HandleCreate(Internship internship)
+    private async Task<HttpResponseMessage> HandleCreate(Project project)
     {
-        var id = internship.Id;
-        internship.Id = Guid.Empty;
-        var response = await Http.PostAsJsonAsync($"api/Internship/Create", internship);
+        var id = project.Id;
+        project.Id = Guid.Empty;
+        var response = await Http.PostAsJsonAsync($"api/Project/Create", project);
         return response;
     }
 
-    private async Task<HttpResponseMessage> HandleUpdate(Internship internship)
+    private async Task<HttpResponseMessage> HandleUpdate(Project project)
     {
-        var id = internship.Id;
-        internship.Id = Guid.Empty;
-        var response = await Http.PostAsJsonAsync($"api/Internship/Create", internship);
+        var id = project.Id;
+        project.Id = Guid.Empty;
+        var response = await Http.PutAsJsonAsync($"api/Project/Update/{id}", project);
         return response;
     }
 }

@@ -6,10 +6,9 @@
         @MudDialog.Title
     </TitleContent>
     <DialogContent>
-        <InternshipForm 
-            SubmitAction="SubmitAction"
-            Internship="Internship"
-            ShowInternshipId="ShowInternshipId"/>
+        <ProjectForm SubmitAction="SubmitAction"
+                        Project="Project"
+                        ShowProjectId="ShowProjectId" />
     </DialogContent>
     <DialogActions>
     </DialogActions>
@@ -19,11 +18,11 @@
     private IMudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public Internship Internship { get; set; } = new();
+    public Project Project { get; set; } = new();
 
     [Parameter]
-    public bool ShowInternshipId { get; set; } = false;
+    public bool ShowProjectId { get; set; } = false;
 
     [Parameter]
-    public Func<Internship, Task<HttpResponseMessage>> SubmitAction { get; set; }
+    public Func<Project, Task<HttpResponseMessage>> SubmitAction { get; set; }
 }

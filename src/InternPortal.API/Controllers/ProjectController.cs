@@ -19,8 +19,11 @@ namespace InternPortal.API.Controllers
         public async Task<ActionResult<List<ProjectResponse>>> GetAll([FromQuery] BaseFilter filter, [FromQuery] SortParams sort, [FromQuery] PageParams pageParams)
         {
             var projects = await projectService.GetAllProject(filter, sort, pageParams);
+            //плохо
+            var projectCount = (await projectService.GetAllProject(filter, sort, null)).Count;
 
-            return Ok(projects.Select(Mapping.Mapper.Map<ProjectResponse>));
+            return Ok(new PagedProjectResponse(projectCount,
+                projects.Select(Mapping.Mapper.Map<ProjectResponse>).ToList()));
         }
 
         [HttpGet("{id:guid}")]

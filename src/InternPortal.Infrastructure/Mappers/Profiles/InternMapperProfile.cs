@@ -50,7 +50,7 @@ namespace InternPortal.Infrastructure.Mappers.Profiles
                 new InternshipResponse(i.Internship.Id, i.Internship.Name, null, i.Internship.CreatedAt, i.Internship.UpdatedAt),
                 new ProjectResponse(i.Project.Id, i.Project.Name, null, i.Project.CreatedAt, i.Project.UpdatedAt),
                 i.CreatedAt, i.UpdatedAt))
-                 .ForPath(dest => dest.Project.InternIds, opt => opt.Ignore())
+                 .ForPath(dest => dest.Project.Interns, opt => opt.Ignore())
                  .ForPath(dest => dest.Internship.Interns, opt => opt.Ignore());
 
             CreateMap<InternshipRequest, Internship>()
