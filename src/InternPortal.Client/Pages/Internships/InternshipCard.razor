@@ -165,8 +165,6 @@
 
     private int PageCount { get; set; }
 
-    private IEnumerable<Guid> selectedInternsForInternship = new List<Guid>();
-
     private string? SortDirectionString
     {
         get
@@ -295,18 +293,8 @@
     }
 
     private async Task<HttpResponseMessage> HandleCreate(Internship internship)
-    {
-        var id = internship.Id;
-        internship.Id = Guid.Empty;
-        var response = await Http.PostAsJsonAsync($"api/Internship/Create", internship);
-        return response;
-    }
+        => await Http.PostAsJsonAsync($"api/Internship/Create", internship);
 
     private async Task<HttpResponseMessage> HandleUpdate(Internship internship)
-    {
-        var id = internship.Id;
-        internship.Id = Guid.Empty;
-        var response = await Http.PutAsJsonAsync($"api/Internship/Update/{id}", internship);
-        return response;
-    }
+        => await Http.PutAsJsonAsync($"api/Internship/Update/{internship.Id}", internship);
 }

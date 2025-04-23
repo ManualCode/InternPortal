@@ -83,33 +83,18 @@
 @code {
     private Intern CurrentIntern = new();
 
-    private Task OpenDialogAsync(InternForList intern)
-    {
-
-        CurrentIntern = new Intern
-        {
-            Id = intern.Id,
-            FirstName = intern.FullName.Split(' ')[0],
-            LastName = intern.FullName.Split(' ')[1],
-            Gender = intern.Gender.ToString(),
-            Email = intern.Email,
-            PhoneNumber = intern.PhoneNumber,
-            BirthDate = intern.BirthDate,
-            Internship = intern.Internship.Name,
-            Project = intern.Project.Name
-        };
-        var parameters = new DialogParameters<EditDialog> { { x => x.Intern, CurrentIntern } };
-
-        return DialogService.ShowAsync<EditDialog>("Simple Dialog", parameters);
-    }
-
     private HubConnection? hubConnection;
+
     private List<InternForList> AllInterns = new();
+
     private List<InternForList> FilteredInterns = new();
+
     private List<string> AvailableInternships = new();
+
     private List<string> AvailableProjects = new();
 
     private string? SelectedInternship;
+
     private string? SelectedProject;
 
     protected override async Task OnInitializedAsync()
@@ -119,43 +104,19 @@
            .WithAutomaticReconnect()
            .Build();
 
-        hubConnection.On<Intern>("Receive", (intern) =>
+        hubConnection.On<InternForList>("Receive", intern =>
         {
-            var listIntern = new InternForList
-            {
-                Id = intern.Id,
-                FullName = $"{intern.FirstName} {intern.LastName}",
-                Gender = intern.Gender,
-                Email = intern.Email,
-                PhoneNumber = intern.PhoneNumber,
-                BirthDate = intern.BirthDate ?? DateTime.UtcNow,
-                Internship = new Internship { Name = intern.Internship },
-                Project = new Project { Name = intern.Project }
-            };
-            AllInterns.Add(listIntern);
+            AllInterns.Add(intern);
             ApplyFilters();
             InvokeAsync(StateHasChanged);
         });
 
-        hubConnection.On<Guid, Intern>("ReceiveEdit", (id, intern) =>
+        hubConnection.On<InternForList>("ReceiveEdit", intern =>
         {
-            var listIntern = new InternForList
-            {
-                Id = id,
-                FullName = $"{intern.FirstName} {intern.LastName}",
-                Gender = intern.Gender,
-                Email = intern.Email,
-                PhoneNumber = intern.PhoneNumber,
-                BirthDate = intern.BirthDate ?? DateTime.UtcNow,
-                Internship = new Internship { Name = intern.Internship },
-                Project = new Project { Name = intern.Project }
-            };
-            var index = AllInterns.FindIndex(x => x.Id == id);
-            AllInterns[index] = listIntern;
+            AllInterns[AllInterns.FindIndex(x => x.Id == intern.Id)] = intern;
             ApplyFilters();
             InvokeAsync(StateHasChanged);
         });
-
 
         hubConnection.On<Guid>("ReceiveDelete", (id) =>
         {
@@ -163,7 +124,6 @@
             ApplyFilters();
             InvokeAsync(StateHasChanged);
         });
-
         await hubConnection.StartAsync();
 
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
@@ -191,13 +151,10 @@
         if (!string.IsNullOrEmpty(SelectedProject))
             queryParams["Project"] = SelectedProject;
 
-        var newUri = QueryHelpers.AddQueryString("/interns", queryParams);
-        Navigation.NavigateTo(newUri);
+        Navigation.NavigateTo(QueryHelpers.AddQueryString("/interns", queryParams));
 
-        FilteredInterns = AllInterns
-            .Where(i => (SelectedInternship == null || i.Internship.Name == SelectedInternship) &&
-                       (SelectedProject == null || i.Project.Name == SelectedProject))
-            .ToList();
+        FilteredInterns = AllInterns.Where(i => (SelectedInternship == null || i.Internship.Name == SelectedInternship)
+            && (SelectedProject == null || i.Project.Name == SelectedProject)).ToList();
     }
 
     private void ResetFilters()
@@ -206,5 +163,23 @@
         SelectedProject = null;
         FilteredInterns = AllInterns;
         Navigation.NavigateTo("/interns");
+    }
+
+    private Task OpenDialogAsync(InternForList intern)
+    {
+        CurrentIntern = new Intern
+        {
+            Id = intern.Id,
+            FirstName = intern.FullName.Split(' ')[0],
+            LastName = intern.FullName.Split(' ')[1],
+            Gender = intern.Gender.ToString(),
+            Email = intern.Email,
+            PhoneNumber = intern.PhoneNumber,
+            BirthDate = intern.BirthDate,
+            Internship = intern.Internship.Name,
+            Project = intern.Project.Name
+        };
+        return DialogService.ShowAsync<EditDialog>("Обновить данные стажёра",
+            new DialogParameters<EditDialog> { { x => x.Intern, CurrentIntern } });
     }
 }

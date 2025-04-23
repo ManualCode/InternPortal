@@ -9,7 +9,7 @@ namespace InternPortal.Shared.Contracts.Intern.Responses
     string Gender,
     DateTime BirthDate,
     string Email,
-    string PhoneNumber,
+    string? PhoneNumber,
     InternshipResponse Internship,
     ProjectResponse Project,
     DateTime CreateAt,

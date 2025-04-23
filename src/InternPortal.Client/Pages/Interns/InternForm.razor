@@ -189,20 +189,31 @@
     private async Task HandleValidSubmit()
     {
         Intern.BirthDate = DateTime.SpecifyKind((DateTime)Intern.BirthDate, DateTimeKind.Utc);
-        var id = Intern.Id;
         var response = await SubmitAction(Intern);
 
         if (response.IsSuccessStatusCode)
         {
+            Intern.Id = response.Content.ReadFromJsonAsync<Guid>().Result;
+            var listIntern = new InternForList
+            {
+                Id = Intern.Id,
+                FullName = $"{Intern.FirstName} {Intern.LastName}",
+                Gender = Intern.Gender,
+                BirthDate = Intern.BirthDate ?? DateTime.UtcNow,
+                Email = Intern.Email,
+                PhoneNumber = Intern.PhoneNumber,
+                Internship = new Internship { Id = Guid.Empty, Name = Intern.Internship, Interns = new() },
+                Project = new Project { Id = Guid.Empty, Name = Intern.Project, Interns = new() }
+            };
             if (ShowInternId)
             {
-                await hubConnection.InvokeAsync("Editor", id, Intern);
+                await hubConnection.InvokeAsync("Editor", listIntern);
                 Navigation.NavigateTo("/interns");
                 Snackbar.Add("Запись успешно обновлена", Severity.Success);
             }
             else
             {
-                await hubConnection.InvokeAsync("Sender", Intern);
+                await hubConnection.InvokeAsync("Sender", listIntern);
                 Intern = new Intern();
                 Snackbar.Add("Запись успешно добавлена", Severity.Success);
             }
