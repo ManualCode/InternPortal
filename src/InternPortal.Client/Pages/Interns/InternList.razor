@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
 @using InternPortal.Client.Models
+@using Microsoft.AspNetCore.SignalR.Client
 @inject HttpClient Http
 @inject IDialogService DialogService
 
@@ -69,7 +70,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
                                Title="Редактировать"
-                               OnClick="@(() => OpenDialogAsync(context))"/>
+                               OnClick="@(() => OpenDialogAsync(context))" />
             </MudTd>
         </RowTemplate>
         <NoRecordsContent>
@@ -102,6 +103,7 @@
         return DialogService.ShowAsync<EditDialog>("Simple Dialog", parameters);
     }
 
+    private HubConnection? hubConnection;
     private List<InternForList> AllInterns = new();
     private List<InternForList> FilteredInterns = new();
     private List<string> AvailableInternships = new();
@@ -112,6 +114,58 @@
 
     protected override async Task OnInitializedAsync()
     {
+        hubConnection = new HubConnectionBuilder()
+           .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7123/internhub"))
+           .WithAutomaticReconnect()
+           .Build();
+
+        hubConnection.On<Intern>("Receive", (intern) =>
+        {
+            var listIntern = new InternForList
+            {
+                Id = intern.Id,
+                FullName = $"{intern.FirstName} {intern.LastName}",
+                Gender = intern.Gender,
+                Email = intern.Email,
+                PhoneNumber = intern.PhoneNumber,
+                BirthDate = intern.BirthDate ?? DateTime.UtcNow,
+                Internship = new Internship { Name = intern.Internship },
+                Project = new Project { Name = intern.Project }
+            };
+            AllInterns.Add(listIntern);
+            ApplyFilters();
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<Guid, Intern>("ReceiveEdit", (id, intern) =>
+        {
+            var listIntern = new InternForList
+            {
+                Id = id,
+                FullName = $"{intern.FirstName} {intern.LastName}",
+                Gender = intern.Gender,
+                Email = intern.Email,
+                PhoneNumber = intern.PhoneNumber,
+                BirthDate = intern.BirthDate ?? DateTime.UtcNow,
+                Internship = new Internship { Name = intern.Internship },
+                Project = new Project { Name = intern.Project }
+            };
+            var index = AllInterns.FindIndex(x => x.Id == id);
+            AllInterns[index] = listIntern;
+            ApplyFilters();
+            InvokeAsync(StateHasChanged);
+        });
+
+
+        hubConnection.On<Guid>("ReceiveDelete", (id) =>
+        {
+            AllInterns.RemoveAt(AllInterns.FindIndex(x => x.Id == id));
+            ApplyFilters();
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Internship", out var internship))
             SelectedInternship = internship.First();

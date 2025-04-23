@@ -1,18 +1,19 @@
 ﻿@using InternPortal.Client.Models
 @inject HttpClient Http
 
-<MudDialog>
+<MudDialog MaxWidth="MaxWidth.Medium" FullHeight="true">
     <TitleContent>
-        @MudDialog.Title
+        <MudText Typo="Typo.h6" Class="ml-2">
+            @MudDialog.Title
+        </MudText>
     </TitleContent>
     <DialogContent>
-        <InternshipForm 
-            SubmitAction="SubmitAction"
-            Internship="Internship"
-            ShowInternshipId="ShowInternshipId"/>
+        <MudPaper Elevation="0" Class="pa-4" Style="height: 100%;">
+            <InternshipForm SubmitAction="SubmitAction"
+                            Internship="Internship"
+                            ShowInternshipId="ShowInternshipId" />
+        </MudPaper>
     </DialogContent>
-    <DialogActions>
-    </DialogActions>
 </MudDialog>
 @code {
     [CascadingParameter]

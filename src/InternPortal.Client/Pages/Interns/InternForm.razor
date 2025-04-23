@@ -1,4 +1,5 @@
 ﻿@using InternPortal.Client.Models
+@using Microsoft.AspNetCore.SignalR.Client 
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject HttpClient Http
@@ -85,6 +86,7 @@
                              Variant="Variant.Outlined"
                              SearchFunc="@GetInternships"
                              CoerceText="true"
+                             CoerceValue="true"
                              Required="true"
                              Class="full-width" />
         </MudItem>
@@ -96,6 +98,7 @@
                              Variant="Variant.Outlined"
                              SearchFunc="@GetProjects"
                              CoerceText="true"
+                             CoerceValue="true"
                              Required="true"
                              Class="full-width" />
         </MudItem>
@@ -152,6 +155,8 @@
     private List<string> Internships { get; set; } = new();
     private List<string>? ProjectNames { get; set; } = new();
 
+    private HubConnection? hubConnection;
+
     private async Task<IEnumerable<string>> GetInternships(string value, CancellationToken token)
     {
         if (string.IsNullOrEmpty(value))
@@ -172,27 +177,40 @@
     {
         Internships = (await Http.GetFromJsonAsync<PagedInternships>("/api/Internship/GetAll")).Internships.Select(x => x.Name).ToList();
         ProjectNames = (await Http.GetFromJsonAsync<PagedProjects>("/api/Project/GetAll")).Projects.Select(x => x.Name).ToList();
+
+        hubConnection = new HubConnectionBuilder()
+           .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7123/internhub"))
+           .WithAutomaticReconnect()
+           .Build();
+        await hubConnection.StartAsync();
+        Console.WriteLine(hubConnection.State);
     }
 
     private async Task HandleValidSubmit()
     {
         Intern.BirthDate = DateTime.SpecifyKind((DateTime)Intern.BirthDate, DateTimeKind.Utc);
+        var id = Intern.Id;
         var response = await SubmitAction(Intern);
-
 
         if (response.IsSuccessStatusCode)
         {
-            Snackbar.Add("Запись успешно добавлена", Severity.Success);
             if (ShowInternId)
+            {
+                await hubConnection.InvokeAsync("Editor", id, Intern);
                 Navigation.NavigateTo("/interns");
+                Snackbar.Add("Запись успешно обновлена", Severity.Success);
+            }
             else
-                Navigation.NavigateTo("/");
-
+            {
+                await hubConnection.InvokeAsync("Sender", Intern);
+                Intern = new Intern();
+                Snackbar.Add("Запись успешно добавлена", Severity.Success);
+            }
         }
         else
         {
             var errorMessage = await response.Content.ReadAsStringAsync();
-            Snackbar.Add("Ошибка при добавлении", Severity.Error);
+            Snackbar.Add("Возникла ошибка", Severity.Error);
             Console.WriteLine($"Ошибка: {errorMessage}");
         }
     }
@@ -213,7 +231,8 @@
 
         if (response.IsSuccessStatusCode)
         {
-            Snackbar.Add("Запись успешно сохранена", Severity.Success);
+            Snackbar.Add("Запись успешно удалена", Severity.Success);
+            await hubConnection.InvokeAsync("Deleter", id);
             Navigation.NavigateTo("/interns");
         }
         else

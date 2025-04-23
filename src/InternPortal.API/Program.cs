@@ -1,3 +1,4 @@
+using InternPortal.API.Hubs;
 using InternPortal.Application.Abstractions.Services;
 using InternPortal.Application.Services;
 using InternPortal.Domain.Abstractions.Repositories;
@@ -35,9 +36,12 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.MapHub<InternHub>("/internhub");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

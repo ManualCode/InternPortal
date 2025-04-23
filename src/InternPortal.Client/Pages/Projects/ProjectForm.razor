@@ -6,43 +6,83 @@
 
 <EditForm Model="@Project" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    <ValidationSummary Class="mb-4" />
 
-    @if (ShowProjectId)
-    {
-        <div class="form-group" read>
-            <label for="id">Id *</label>
-            <InputText id="firstName" @bind-Value="IdString" class="form-control" ReadOnly="true" />
-            <ValidationMessage For="@(() => Project.Id)" />
-        </div>
-    }
-
-    <div class="form-group">
-        <label for="firstName">Имя *</label>
-        <InputText id="firstName" @bind-Value="Project.Name" class="form-control" />
-        <ValidationMessage For="@(() => Project.Name)" />
-    </div>
-
-    <MudSelect T="Guid"
-               Label="Выберите стажеров"
-               MultiSelection="true"
-               @bind-SelectedValues="selectedInternIds">
-        @foreach (var intern in Interns)
+    <MudGrid Spacing="2" Justify="Justify.FlexStart">
+        @if (ShowProjectId)
         {
-            <MudSelectItem T="Guid"
-                           Value="@intern.Id"
-                           Disabled="@(selectedInternIds.Contains(intern.Id) && !CanDeselect)">
-                @intern.FullName
-            </MudSelectItem>
+            <MudItem xs="12" md="6">
+                <MudTextField Label="Id"
+                              Variant="Variant.Outlined"
+                              @bind-Value="IdString"
+                              ReadOnly="true"
+                              Margin="Margin.Dense"
+                              Class="mb-4" />
+            </MudItem>
         }
-    </MudSelect>
 
-    <button type="button" class="btn btn-outline-secondary mt-3 ms-2" @onclick="Cancel">Отмена</button>
-    @if (ShowProjectId)
-    {
-        <button type="button" class="btn btn-outline-danger mt-3 ms-2" @onclick="() => Delete(Project.Id)">Удалить</button>
-    }
-    <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Имя"
+                          Variant="Variant.Outlined"
+                          @bind-Value="Project.Name"
+                          Required="true"
+                          RequiredError="Поле обязательно для заполнения"
+                          Margin="Margin.Dense"
+                          Class="mb-4" />
+            <ValidationMessage For="@(() => Project.Name)" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudSelect T="Guid"
+                       Label="Выберите стажеров"
+                       Variant="Variant.Outlined"
+                       MultiSelection="true"
+                       AnchorOrigin="Origin.BottomCenter"
+                       @bind-SelectedValues="selectedInternIds"
+                       Margin="Margin.Dense"
+                       Class="mb-4">
+                @foreach (var intern in Interns)
+                {
+                    <MudSelectItem T="Guid"
+                                   Value="@intern.Id"
+                                   Disabled="@(selectedInternIds.Contains(intern.Id) && !CanDeselect)">
+                        @intern.FullName
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+
+        <MudItem xs="12" Class="d-flex justify-end mt-4">
+            <div class="d-flex gap-2">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Secondary"
+                           OnClick="Cancel"
+                           StartIcon="@Icons.Material.Filled.Cancel"
+                           Class="ml-2">
+                    Отмена
+                </MudButton>
+
+                @if (ShowProjectId)
+                {
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Error"
+                               OnClick="() => Delete(Project.Id)"
+                               StartIcon="@Icons.Material.Filled.Delete"
+                               Class="ml-2">
+                        Удалить
+                    </MudButton>
+                }
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           ButtonType="ButtonType.Submit"
+                           StartIcon="@Icons.Material.Filled.Save"
+                           Class="ml-2">
+                    Сохранить
+                </MudButton>
+            </div>
+        </MudItem>
+    </MudGrid>
 </EditForm>
 
 @code {
