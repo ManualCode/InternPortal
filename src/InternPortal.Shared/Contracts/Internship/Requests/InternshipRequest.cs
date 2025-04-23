@@ -7,6 +7,7 @@ namespace InternPortal.Shared.Contracts.Internship.Requests
         [Required]
         string Name,
         List<Guid> interns,
-        DateTime CreatedAt
+        DateTime CreateAt,
+        DateTime UpdateAt
     );
 }

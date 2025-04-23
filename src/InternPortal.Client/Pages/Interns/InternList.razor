@@ -1,5 +1,4 @@
 ﻿@page "/interns"
-@using Microsoft.Extensions.Primitives
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
 @using InternPortal.Client.Models
@@ -177,7 +176,9 @@
             PhoneNumber = intern.PhoneNumber,
             BirthDate = intern.BirthDate,
             Internship = intern.Internship.Name,
-            Project = intern.Project.Name
+            Project = intern.Project.Name,
+            CreateAt = intern.CreateAt,
+            UpdateAt = intern.UpdateAt
         };
         return DialogService.ShowAsync<EditDialog>("Обновить данные стажёра",
             new DialogParameters<EditDialog> { { x => x.Intern, CurrentIntern } });

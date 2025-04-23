@@ -59,13 +59,14 @@ namespace InternPortal.Infrastructure.Repositories
                 {
                     Id = project.Id,
                     Name = project.Name,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
                 dbContext.Projects.Add(existingProject);
                 dbContext.SaveChanges();
             }
 
-            return Project.Create(existingProject.Name, [], existingProject.CreatedAt, existingProject.Id);
+            return Project.Create(existingProject.Name, [], existingProject.CreatedAt, existingProject.UpdatedAt, existingProject.Id);
         }
 
         public async Task<List<Project>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams page)

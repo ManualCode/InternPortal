@@ -51,6 +51,17 @@
             </MudSelect>
         </MudItem>
 
+        @if (ShowInternshipId)
+        {
+            <MudItem xs="12" md="6" class="pa-2">
+                <MudText>Создан: @Internship.CreateAt</MudText>
+            </MudItem>
+            <MudItem xs="12" md="6" class="pa-2">
+                <MudText>Изменён: @Internship.UpdateAt</MudText>
+
+            </MudItem>
+        }
+
         <MudItem xs="12" Class="d-flex justify-end mt-4">
             <div class="d-flex gap-2">
                 <MudButton Variant="Variant.Text"
@@ -94,7 +105,7 @@
     [Parameter]
     public Internship Internship { get; set; } = new();
 
-    private List<InternForList> Interns { get; set; } = new();
+    private List<InternForList>? Interns { get; set; } = new();
 
     private IEnumerable<Guid> selectedInternIds = new HashSet<Guid>();
 
@@ -116,6 +127,8 @@
     private async Task HandleValidSubmit()
     {
         Internship.Interns = selectedInternIds.ToList();
+        Internship.UpdateAt = DateTime.UtcNow;
+        if (!ShowInternshipId) Internship.CreateAt = DateTime.UtcNow;
         var response = await SubmitAction(Internship);
 
 
@@ -133,7 +146,6 @@
     private void Cancel()
     {
         Navigation.NavigateTo("/entities");
-
     }
 
     private async Task Delete(Guid id)

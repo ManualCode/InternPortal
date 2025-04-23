@@ -86,7 +86,8 @@
                                 <MudBadge Color="Color.Primary"
                                           Content="@context.Interns.Count"
                                           Style="cursor: pointer"
-                                          Class="ma-2" />
+                                          Class="ma-2" 
+                                          @onclick="(()=> GetInterns(context.Interns))"/>
                             </ActivatorContent>
                             <ChildContent>
                                 @if (context.Interns.Any())
@@ -125,7 +126,9 @@
 
                         <MudText Typo="Typo.body2">Перейти на:</MudText>
 
-                        <MudTextField Value="Page"
+                        <MudNumericField Value="Page"
+                                      Min="1"
+                                      Max="@PageCount"
                                       Variant="Variant.Outlined"
                                       InputType="InputType.Number"
                                       Immediate="true"
@@ -240,7 +243,6 @@
 
         Navigation.NavigateTo(QueryHelpers.AddQueryString("/entities", queryParams));
 
-
         var response = await Http.GetFromJsonAsync<PagedProjects>(QueryHelpers.AddQueryString("api/Project/GetAll", queryParams));
         PageCount = (response.TotalCount + PageSize - 1) / PageSize;
         Project = response.Projects;
@@ -257,7 +259,6 @@
 
     private Task OpenInternDialogAsync(InternForList intern)
     {
-
         var currentIntern = new Intern
         {
             Id = intern.Id,
@@ -268,43 +269,29 @@
             PhoneNumber = intern.PhoneNumber,
             BirthDate = intern.BirthDate,
             Internship = intern.Internship.Name,
-            Project = intern.Project.Name
+            Project = intern.Project.Name,
+            CreateAt = intern.CreateAt,
+            UpdateAt = intern.UpdateAt
         };
-
-        var parameters = new DialogParameters<EditDialog> { { x => x.Intern, currentIntern } };
-
-        return DialogService.ShowAsync<EditDialog>("Обновить стажёра", parameters);
+        return DialogService.ShowAsync<EditDialog>("Обновить стажёра",
+            new DialogParameters<EditDialog> { { x => x.Intern, currentIntern } });
     }
 
     private Task CreateDialogAsync(Project internship)
-    {
-        var parameters = new DialogParameters<ProjectDialog> { { x => x.Project, internship },
-            { x => x.SubmitAction, HandleCreate }, { x => x.ShowProjectId, false } };
-
-        return DialogService.ShowAsync<ProjectDialog>("Добавить проект", parameters);
-    }
+        => DialogService.ShowAsync<ProjectDialog>("Добавить проект",
+            new DialogParameters<ProjectDialog> { { x => x.Project, internship },
+            { x => x.SubmitAction, HandleCreate }, { x => x.ShowProjectId, false } });
 
     private Task UpdateDialogAsync(Project project)
-    {
-        var parameters = new DialogParameters<ProjectDialog> { { x => x.Project, project },
-            { x => x.SubmitAction, HandleUpdate }, { x => x.ShowProjectId, true} };
-
-        return DialogService.ShowAsync<ProjectDialog>("Обновить проект", parameters);
-    }
+        => DialogService.ShowAsync<ProjectDialog>("Обновить проект",
+            new DialogParameters<ProjectDialog> { { x => x.Project, project },
+            { x => x.SubmitAction, HandleUpdate }, { x => x.ShowProjectId, true} });
+    
 
     private async Task<HttpResponseMessage> HandleCreate(Project project)
-    {
-        var id = project.Id;
-        project.Id = Guid.Empty;
-        var response = await Http.PostAsJsonAsync($"api/Project/Create", project);
-        return response;
-    }
+        => await Http.PostAsJsonAsync($"api/Project/Create", project);
+    
 
     private async Task<HttpResponseMessage> HandleUpdate(Project project)
-    {
-        var id = project.Id;
-        project.Id = Guid.Empty;
-        var response = await Http.PutAsJsonAsync($"api/Project/Update/{id}", project);
-        return response;
-    }
+        => await Http.PutAsJsonAsync($"api/Project/Update/{project.Id}", project);
 }

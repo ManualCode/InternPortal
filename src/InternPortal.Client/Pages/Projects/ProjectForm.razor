@@ -52,6 +52,17 @@
             </MudSelect>
         </MudItem>
 
+        @if (ShowProjectId)
+        {
+            <MudItem xs="12" md="6" class="pa-2">
+                <MudText>Создан: @Project.CreateAt</MudText>
+            </MudItem>
+            <MudItem xs="12" md="6" class="pa-2">
+                <MudText>Изменён: @Project.UpdateAt</MudText>
+
+            </MudItem>
+        }
+
         <MudItem xs="12" Class="d-flex justify-end mt-4">
             <div class="d-flex gap-2">
                 <MudButton Variant="Variant.Text"
@@ -95,7 +106,7 @@
     [Parameter]
     public Func<Project, Task<HttpResponseMessage>> SubmitAction { get; set; }
 
-    private List<InternForList> Interns { get; set; } = new();
+    private List<InternForList>? Interns { get; set; } = new();
 
     private IEnumerable<Guid> selectedInternIds = new HashSet<Guid>();
 
@@ -110,13 +121,15 @@
     protected override async Task OnInitializedAsync()
     {
         Interns = await Http.GetFromJsonAsync<List<InternForList>>("/api/Intern/GetAll");
-        if (ShowProjectId)
-            selectedInternIds = Project.Interns;
+
+        if (ShowProjectId) selectedInternIds = Project.Interns;
     }
 
     private async Task HandleValidSubmit()
     {
         Project.Interns = selectedInternIds.ToList();
+        Project.UpdateAt = DateTime.UtcNow;
+        if (!ShowProjectId) Project.CreateAt = DateTime.UtcNow;
         var response = await SubmitAction(Project);
 
 

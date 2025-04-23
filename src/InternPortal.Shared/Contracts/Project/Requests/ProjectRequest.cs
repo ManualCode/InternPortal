@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace InternPortal.Shared.Contracts.Project.Requests
 {
@@ -11,7 +6,7 @@ namespace InternPortal.Shared.Contracts.Project.Requests
         [Required]
         string Name,
         List<Guid> interns,
-        DateTime CreatedAt,
+        DateTime CreateAt,
         DateTime UpdateAt
     );
 }

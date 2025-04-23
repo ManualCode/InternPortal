@@ -34,5 +34,8 @@ namespace InternPortal.Client.Models
 
         [Required(ErrorMessage = "Укажите название проекта")]
         public string Project { get; set; }
+
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
     }
 }

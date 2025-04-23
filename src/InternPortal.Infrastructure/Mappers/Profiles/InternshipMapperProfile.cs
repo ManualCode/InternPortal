@@ -14,13 +14,13 @@ namespace InternPortal.Infrastructure.Mappers.Profiles
         public InternshipMapperProfile()
         {
             CreateMap<InternshipEntity, Internship>()
-                 .ConstructUsing((InternshipEntity ie) => Internship.Create(ie.Name, ie.Interns.Select(x => x.Id).ToList(), ie.CreatedAt, ie.Id))
+                 .ConstructUsing((InternshipEntity ie) => Internship.Create(ie.Name, ie.Interns.Select(x => x.Id).ToList(), ie.CreatedAt, ie.UpdatedAt, ie.Id))
                  .PreserveReferences();
 
             CreateMap<Internship, InternshipEntity>();
 
             CreateMap<InternshipRequest, Internship>()
-                .ConstructUsing((InternshipRequest ir) => Internship.Create(ir.Name, ir.interns, ir.CreatedAt, null));
+                .ConstructUsing((InternshipRequest ir) => Internship.Create(ir.Name, ir.interns, ir.CreateAt, ir.UpdateAt, null));
 
             CreateMap<Internship, InternshipResponse>()
                 .ConstructUsing((Internship i) => new InternshipResponse(i.Id, i.Name, i.InternIds.ToList(), i.CreatedAt, i.UpdatedAt));

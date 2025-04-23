@@ -28,10 +28,10 @@ namespace InternPortal.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Guid>> Create([FromBody] InternRequest request)
         {
-            var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreatedAt));
-            var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreatedAt));
+            var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreateAt, request.UpdateAt));
+            var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreateAt, request.UpdateAt));
             var intern = Intern.Create(request.FirstName, request.LastName, Enum.Parse<Gender>(request.Gender),
-                request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreatedAt);
+                request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreateAt, request.UpdateAt);
 
             return Ok(await internService.CreateIntern(intern));
         }
@@ -39,10 +39,10 @@ namespace InternPortal.API.Controllers
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<Guid>> Update(Guid id, [FromBody] InternRequest request)
         {
-            var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreatedAt));
-            var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreatedAt));
+            var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreateAt, request.UpdateAt));
+            var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreateAt, request.UpdateAt));
             var intern = Intern.Create(request.FirstName, request.LastName, Enum.Parse<Gender>(request.Gender),
-                request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreatedAt);
+                request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreateAt, request.UpdateAt);
 
             return Ok(await internService.UpdateIntern(id, intern));
         }

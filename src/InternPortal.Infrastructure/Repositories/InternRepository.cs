@@ -13,6 +13,7 @@ namespace InternPortal.Infrastructure.Repositories
     {
         public async Task<Guid> AddAsync(Intern entity)
         {
+            var e = Mapping.Mapper.Map<InternEntity>(entity);
             await dbContext.Interns.AddAsync(Mapping.Mapper.Map<InternEntity>(entity));
             await dbContext.SaveChangesAsync();
 

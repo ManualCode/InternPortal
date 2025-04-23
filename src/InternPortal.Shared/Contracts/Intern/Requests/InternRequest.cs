@@ -19,7 +19,7 @@ namespace InternPortal.Shared.Contracts.Intern.Requests
         string Internship,
         [Required]
         string Project,
-        DateTime CreatedAt,
+        DateTime CreateAt,
         DateTime UpdateAt
     );
 }

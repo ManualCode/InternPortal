@@ -59,13 +59,14 @@ namespace InternPortal.Infrastructure.Repositories
                 {
                     Id = internship.Id,
                     Name = internship.Name,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
                 dbContext.Internships.Add(existingInternship);
                 dbContext.SaveChanges();
             }
 
-            return Internship.Create(existingInternship.Name, [], existingInternship.CreatedAt, existingInternship.Id);
+            return Internship.Create(existingInternship.Name, [], existingInternship.CreatedAt, existingInternship.UpdatedAt, existingInternship.Id);
         }
 
         public async Task<List<Internship>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams pageParams)

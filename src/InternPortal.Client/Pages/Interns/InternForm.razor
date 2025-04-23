@@ -72,6 +72,7 @@
 
         <MudItem xs="12" md="6" class="pa-2">
             <MudDatePicker Label="Дата рождения"
+                           Mask="@(new DateMask("dd.MM.yyyy"))"
                            @bind-Date="Intern.BirthDate"
                            Variant="Variant.Outlined"
                            Required="true"
@@ -88,6 +89,7 @@
                              CoerceText="true"
                              CoerceValue="true"
                              Required="true"
+                             
                              Class="full-width" />
         </MudItem>
 
@@ -102,7 +104,16 @@
                              Required="true"
                              Class="full-width" />
         </MudItem>
-    </MudGrid>
+
+        @if (ShowInternId)
+        {
+            <MudItem xs="12" md="6" class="pa-2">
+                <MudText>Создан: @Intern.CreateAt</MudText>
+                <MudText>Изменён: @Intern.UpdateAt</MudText>
+            </MudItem>
+        }
+
+        </MudGrid>
 
     <div class="d-flex justify-end mt-4">
         <MudButton Variant="Variant.Text"
@@ -189,6 +200,9 @@
     private async Task HandleValidSubmit()
     {
         Intern.BirthDate = DateTime.SpecifyKind((DateTime)Intern.BirthDate, DateTimeKind.Utc);
+        Intern.UpdateAt = DateTime.UtcNow;
+        if (!ShowInternId) Intern.CreateAt = DateTime.UtcNow;
+
         var response = await SubmitAction(Intern);
 
         if (response.IsSuccessStatusCode)
@@ -203,7 +217,9 @@
                 Email = Intern.Email,
                 PhoneNumber = Intern.PhoneNumber,
                 Internship = new Internship { Id = Guid.Empty, Name = Intern.Internship, Interns = new() },
-                Project = new Project { Id = Guid.Empty, Name = Intern.Project, Interns = new() }
+                Project = new Project { Id = Guid.Empty, Name = Intern.Project, Interns = new() },
+                CreateAt = Intern.CreateAt,
+                UpdateAt = Intern.UpdateAt
             };
             if (ShowInternId)
             {

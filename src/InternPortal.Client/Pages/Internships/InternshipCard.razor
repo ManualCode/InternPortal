@@ -85,7 +85,8 @@
                                 <MudBadge Color="Color.Primary"
                                           Content="@context.Interns.Count"
                                           Style="cursor: pointer"
-                                          Class="ma-2" />
+                                          Class="ma-2" 
+                                          @onclick="(()=> GetInterns(context.Interns))"/>
                             </ActivatorContent>
                             <ChildContent>
                                 @if (context.Interns.Any())
@@ -124,7 +125,9 @@
 
                         <MudText Typo="Typo.body2">Перейти на:</MudText>
 
-                        <MudTextField Value="Page"
+                        <MudNumericField Value="Page"
+                                      Min="1"
+                                      Max="@PageCount"
                                       Variant="Variant.Outlined"
                                       InputType="InputType.Number"
                                       Immediate="true"
@@ -157,7 +160,7 @@
 
     private string? OrderBy { get; set; }
 
-    private bool? SortDirection { get; set; }
+    private bool? SortDirection { get; set; } = false;
 
     private int Page = 1;
 
@@ -257,7 +260,6 @@
 
     private Task OpenInternDialogAsync(InternForList intern)
     {
-
         var currentIntern = new Intern
         {
             Id = intern.Id,
@@ -268,29 +270,24 @@
             PhoneNumber = intern.PhoneNumber,
             BirthDate = intern.BirthDate,
             Internship = intern.Internship.Name,
-            Project = intern.Project.Name
+            Project = intern.Project.Name,
+            CreateAt = intern.CreateAt,
+            UpdateAt = intern.UpdateAt
         };
-
-        var parameters = new DialogParameters<EditDialog> { { x => x.Intern, currentIntern } };
-
-        return DialogService.ShowAsync<EditDialog>("Обновить стажёра", parameters);
+        return DialogService.ShowAsync<EditDialog>("Обновить стажёра",
+            new DialogParameters<EditDialog> { { x => x.Intern, currentIntern } });
     }
 
     private Task CreateDialogAsync(Internship internship)
-    {
-        var parameters = new DialogParameters<InternshipEditDialog> { { x => x.Internship, internship },
-        { x => x.SubmitAction, HandleCreate }, { x => x.ShowInternshipId, false } };
-
-        return DialogService.ShowAsync<InternshipEditDialog>("Добавить направление", parameters);
-    }
+        => DialogService.ShowAsync<InternshipEditDialog>("Добавить направление", 
+            new DialogParameters<InternshipEditDialog> { { x => x.Internship, internship },
+                { x => x.SubmitAction, HandleCreate }, { x => x.ShowInternshipId, false } });
 
     private Task UpdateDialogAsync(Internship internship)
-    {
-        var parameters = new DialogParameters<InternshipEditDialog> { { x => x.Internship, internship },
-        { x => x.SubmitAction, HandleUpdate }, { x => x.ShowInternshipId, true} };
 
-        return DialogService.ShowAsync<InternshipEditDialog>("Обновить направление", parameters);
-    }
+        => DialogService.ShowAsync<InternshipEditDialog>("Обновить направление",
+            new DialogParameters<InternshipEditDialog> { { x => x.Internship, internship },
+                { x => x.SubmitAction, HandleUpdate }, { x => x.ShowInternshipId, true} });
 
     private async Task<HttpResponseMessage> HandleCreate(Internship internship)
         => await Http.PostAsJsonAsync($"api/Internship/Create", internship);

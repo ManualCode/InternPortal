@@ -13,13 +13,13 @@ namespace InternPortal.Infrastructure.Mappers.Profiles
         {
             CreateMap<ProjectEntity, Project>()
                 .ConstructUsing((ProjectEntity pe) =>
-                Project.Create(pe.Name, pe.Interns.Select(x => x.Id).ToList(), pe.CreatedAt, pe.Id))
+                Project.Create(pe.Name, pe.Interns.Select(x => x.Id).ToList(), pe.CreatedAt, pe.UpdatedAt, pe.Id))
                 .PreserveReferences();
 
             CreateMap<Project, ProjectEntity>();
 
             CreateMap<ProjectRequest, Project>()
-                .ConstructUsing((ProjectRequest pr) => Project.Create(pr.Name, pr.interns, pr.CreatedAt, null));
+                .ConstructUsing((ProjectRequest pr) => Project.Create(pr.Name, pr.interns, pr.CreateAt, pr.UpdateAt, null));
 
             CreateMap<Project, ProjectResponse>()
                 .ConstructUsing((Project p) => new ProjectResponse(p.Id, p.Name, p.InternIds.ToList(), p.CreatedAt, p.UpdatedAt));

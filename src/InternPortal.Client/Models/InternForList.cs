@@ -17,6 +17,9 @@
         public Internship Internship { get; set; }
 
         public Project Project { get; set; }
-        
+
+        public DateTime CreateAt { get; set; }
+
+        public DateTime UpdateAt { get; set; }
     }
 }
