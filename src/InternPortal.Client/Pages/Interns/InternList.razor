@@ -99,7 +99,7 @@
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
-           .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7123/internhub"))
+           .WithUrl(Navigation.ToAbsoluteUri("http://localhost:5000/internhub"))
            .WithAutomaticReconnect()
            .Build();
 
@@ -180,7 +180,7 @@
             CreateAt = intern.CreateAt,
             UpdateAt = intern.UpdateAt
         };
-        return DialogService.ShowAsync<EditDialog>("Обновить данные стажёра",
-            new DialogParameters<EditDialog> { { x => x.Intern, CurrentIntern } });
+        return DialogService.ShowAsync<InternDialog>("Обновить данные стажёра",
+            new DialogParameters<InternDialog> { { x => x.Intern, CurrentIntern } });
     }
 }
