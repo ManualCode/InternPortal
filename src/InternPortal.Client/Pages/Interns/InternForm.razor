@@ -1,5 +1,5 @@
 ﻿@using InternPortal.Client.Models
-@using Microsoft.AspNetCore.SignalR.Client 
+@using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject HttpClient Http
@@ -89,7 +89,6 @@
                              CoerceText="true"
                              CoerceValue="true"
                              Required="true"
-                             
                              Class="full-width" />
         </MudItem>
 
@@ -113,7 +112,7 @@
             </MudItem>
         }
 
-        </MudGrid>
+    </MudGrid>
 
     <div class="d-flex justify-end mt-4">
         <MudButton Variant="Variant.Text"
@@ -190,7 +189,7 @@
         ProjectNames = (await Http.GetFromJsonAsync<PagedProjects>("/api/Project/GetAll")).Projects.Select(x => x.Name).ToList();
 
         hubConnection = new HubConnectionBuilder()
-           .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7123/internhub"))
+           .WithUrl(Navigation.ToAbsoluteUri("http://localhost:5000/internhub"))
            .WithAutomaticReconnect()
            .Build();
         await hubConnection.StartAsync();
