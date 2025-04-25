@@ -1,5 +1,28 @@
 # InternPortal
 
+## Быстрый запуск
+
+1. **Установите Docker и Docker Compose**:
+   - Убедитесь, что у вас установлены Docker и Docker Compose. Если нет, следуйте официальной документации для установки:
+     - [Docker](https://docs.docker.com/get-docker/)
+     - [Docker Compose](https://docs.docker.com/compose/install/)
+
+2. **Клонируйте репозиторий**:
+   ```bash
+   git clone https://github.com/ManualCode/InternPortal.git
+   cd InternPotal
+   ```
+   
+3. **Запустите проект с помощью Docker Compose**:
+   ```bash
+   docker-compose up --build
+   ```
+
+   Эта команда соберет и запустит все необходимые сервисы.
+
+4. **Проверка работы**:
+   После успешного запуска, бот будет доступен в Telegram. Вы можете начать добавлять слова и запускать тренировки.
+
 ## Требования к реализации
 
 Требуется реализовать функционал Web-приложения «Учет стажеров». 
