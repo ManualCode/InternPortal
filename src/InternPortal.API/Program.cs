@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("https://localhost:44309", "https://localhost:7252")
+        policy.WithOrigins("http://localhost:7100", "https://localhost:44351")
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials();
@@ -55,5 +55,12 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseCors();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<InternPortalDbContext>();
+    if (context.Database.GetPendingMigrations().Any())
+        context.Database.Migrate();
+}
 
 app.Run();

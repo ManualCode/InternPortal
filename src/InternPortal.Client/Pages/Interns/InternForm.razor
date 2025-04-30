@@ -1,8 +1,10 @@
 ﻿@using InternPortal.Client.Models
-@using Microsoft.AspNetCore.SignalR.Client 
+@using Microsoft.AspNetCore.SignalR.Client
+@using InternPortal.Client.Components.SignalR
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject HttpClient Http
+@inject IConfiguration Configuration
 
 
 <EditForm Model="@Intern" OnValidSubmit="@HandleValidSubmit" class="pa-4">
@@ -14,7 +16,8 @@
         {
             <MudItem xs="12" md="6" class="pa-2">
                 <MudTextField Label="Id"
-                              @bind-Value="IdString"
+                              T="Guid"
+                              @bind-Value="Intern.Id"
                               Variant="Variant.Outlined"
                               ReadOnly="true"
                               Class="full-width" />
@@ -89,7 +92,6 @@
                              CoerceText="true"
                              CoerceValue="true"
                              Required="true"
-                             
                              Class="full-width" />
         </MudItem>
 
@@ -113,7 +115,7 @@
             </MudItem>
         }
 
-        </MudGrid>
+    </MudGrid>
 
     <div class="d-flex justify-end mt-4">
         <MudButton Variant="Variant.Text"
@@ -157,44 +159,25 @@
     [Parameter]
     public Intern Intern { get; set; } = new();
 
-    private string IdString
-    {
-        get => Intern.Id.ToString();
-        set => Intern.Id = Guid.TryParse(value, out var guid) ? guid : Guid.Empty;
-    }
+    private InternHub? InternHub;
 
     private List<string> Internships { get; set; } = new();
-    private List<string>? ProjectNames { get; set; } = new();
 
-    private HubConnection? hubConnection;
+    private List<string> ProjectNames { get; set; } = new();
 
     private async Task<IEnumerable<string>> GetInternships(string value, CancellationToken token)
-    {
-        if (string.IsNullOrEmpty(value))
-            return Internships;
-
-        return Internships.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
+        => string.IsNullOrEmpty(value) ? Internships
+            : Internships.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
 
     private async Task<IEnumerable<string>> GetProjects(string value, CancellationToken token)
-    {
-        if (string.IsNullOrEmpty(value))
-            return ProjectNames;
-
-        return ProjectNames.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
+        => string.IsNullOrEmpty(value) ? ProjectNames
+            : ProjectNames.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
         Internships = (await Http.GetFromJsonAsync<PagedInternships>("/api/Internship/GetAll")).Internships.Select(x => x.Name).ToList();
         ProjectNames = (await Http.GetFromJsonAsync<PagedProjects>("/api/Project/GetAll")).Projects.Select(x => x.Name).ToList();
-
-        hubConnection = new HubConnectionBuilder()
-           .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7123/internhub"))
-           .WithAutomaticReconnect()
-           .Build();
-        await hubConnection.StartAsync();
-        Console.WriteLine(hubConnection.State);
+        InternHub = new InternHub(Configuration);
     }
 
     private async Task HandleValidSubmit()
@@ -223,13 +206,13 @@
             };
             if (ShowInternId)
             {
-                await hubConnection.InvokeAsync("Editor", listIntern);
+                InternHub?.Sender("Editor", listIntern);
                 Navigation.NavigateTo("/interns");
                 Snackbar.Add("Запись успешно обновлена", Severity.Success);
             }
             else
             {
-                await hubConnection.InvokeAsync("Sender", listIntern);
+                InternHub?.Sender("Sender", listIntern);
                 Intern = new Intern();
                 Snackbar.Add("Запись успешно добавлена", Severity.Success);
             }
@@ -242,24 +225,16 @@
         }
     }
 
-    private void Cancel()
-    {
-        if (ShowInternId)
-            Navigation.NavigateTo("/interns");
-        else
-            Navigation.NavigateTo("/");
-
-    }
+    private void Cancel() => Navigation.NavigateTo(ShowInternId ? "/interns" : "/");
 
     private async Task Delete(Guid id)
     {
-
         var response = await Http.DeleteAsync($"/api/Intern/Delete/{id}");
 
         if (response.IsSuccessStatusCode)
         {
             Snackbar.Add("Запись успешно удалена", Severity.Success);
-            await hubConnection.InvokeAsync("Deleter", id);
+            InternHub?.Sender("Deleter", id);
             Navigation.NavigateTo("/interns");
         }
         else

@@ -11,7 +11,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("https://localhost:7123")
+    BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] 
+        ?? throw new Exception("Не выполнена настройка API"))
 });
 
 builder.Services.AddMudServices();

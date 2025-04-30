@@ -2,9 +2,10 @@
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
 @using InternPortal.Client.Models
-@using Microsoft.AspNetCore.SignalR.Client
+@using InternPortal.Client.Components.SignalR
 @inject HttpClient Http
 @inject IDialogService DialogService
+@inject IConfiguration Configuration
 
 
 <MudCard Class="mb-4">
@@ -82,7 +83,7 @@
 @code {
     private Intern CurrentIntern = new();
 
-    private HubConnection? hubConnection;
+    private InternHub? InternHub;
 
     private List<InternForList> AllInterns = new();
 
@@ -98,32 +99,28 @@
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
-           .WithUrl(Navigation.ToAbsoluteUri("https://localhost:7123/internhub"))
-           .WithAutomaticReconnect()
-           .Build();
+        InternHub = new InternHub(Configuration);
 
-        hubConnection.On<InternForList>("Receive", intern =>
+        InternHub.Receiver<InternForList>("Receive", intern =>
         {
             AllInterns.Add(intern);
             ApplyFilters();
             InvokeAsync(StateHasChanged);
         });
 
-        hubConnection.On<InternForList>("ReceiveEdit", intern =>
+        InternHub.Receiver<InternForList>("ReceiveEdit", intern =>
         {
             AllInterns[AllInterns.FindIndex(x => x.Id == intern.Id)] = intern;
             ApplyFilters();
             InvokeAsync(StateHasChanged);
         });
 
-        hubConnection.On<Guid>("ReceiveDelete", (id) =>
+        InternHub.Receiver<Guid>("ReceiveDelete", (id) =>
         {
             AllInterns.RemoveAt(AllInterns.FindIndex(x => x.Id == id));
             ApplyFilters();
             InvokeAsync(StateHasChanged);
         });
-        await hubConnection.StartAsync();
 
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("Internship", out var internship))
