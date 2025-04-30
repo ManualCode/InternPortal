@@ -26,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Domain", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Shared", "src\InternPortal.Shared\InternPortal.Shared.csproj", "{26C56201-82C6-4A94-92D4-DE434B38CAE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Client", "src\InternPortal.Client\InternPortal.Client.csproj", "{795160D4-6DFE-4F47-93D2-8CA356D9C9BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternPortal.Client", "src\InternPortal.Client\InternPortal.Client.csproj", "{BA59E93C-A432-44ED-BE58-46EE9844A400}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,10 +54,10 @@ Global
 		{26C56201-82C6-4A94-92D4-DE434B38CAE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26C56201-82C6-4A94-92D4-DE434B38CAE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26C56201-82C6-4A94-92D4-DE434B38CAE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{795160D4-6DFE-4F47-93D2-8CA356D9C9BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{795160D4-6DFE-4F47-93D2-8CA356D9C9BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{795160D4-6DFE-4F47-93D2-8CA356D9C9BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{795160D4-6DFE-4F47-93D2-8CA356D9C9BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA59E93C-A432-44ED-BE58-46EE9844A400}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA59E93C-A432-44ED-BE58-46EE9844A400}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA59E93C-A432-44ED-BE58-46EE9844A400}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA59E93C-A432-44ED-BE58-46EE9844A400}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

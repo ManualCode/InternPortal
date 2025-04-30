@@ -21,7 +21,7 @@
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Search"
                                           Class="full-width"
-                                          ValueChanged="@((string filter) => OnFilterChanged(filter))"/>
+                                          ValueChanged="@((string filter) => OnFilterChanged(filter))" />
                         </MudItem>
 
                         <MudItem xs="12" sm="6" md="4">
@@ -86,8 +86,8 @@
                                 <MudBadge Color="Color.Primary"
                                           Content="@context.Interns.Count"
                                           Style="cursor: pointer"
-                                          Class="ma-2" 
-                                          @onclick="(()=> GetInterns(context.Interns))"/>
+                                          Class="ma-2"
+                                          @onclick="(()=> GetInterns(context.Interns))" />
                             </ActivatorContent>
                             <ChildContent>
                                 @if (context.Interns.Any())
@@ -127,14 +127,14 @@
                         <MudText Typo="Typo.body2">Перейти на:</MudText>
 
                         <MudNumericField Value="Page"
-                                      Min="1"
-                                      Max="@PageCount"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Number"
-                                      Immediate="true"
-                                      Class="flex-none"
-                                      Style="width: 80px"
-                                      ValueChanged="@((int newPage) => OnPageChanged(newPage))" />
+                                         Min="1"
+                                         Max="@PageCount"
+                                         Variant="Variant.Outlined"
+                                         InputType="InputType.Number"
+                                         Immediate="true"
+                                         Class="flex-none"
+                                         Style="width: 80px"
+                                         ValueChanged="@((int newPage) => OnPageChanged(newPage))" />
                     </MudContainer>
                 </PagerContent>
             </MudTable>
@@ -273,8 +273,8 @@
             CreateAt = intern.CreateAt,
             UpdateAt = intern.UpdateAt
         };
-        return DialogService.ShowAsync<EditDialog>("Обновить стажёра",
-            new DialogParameters<EditDialog> { { x => x.Intern, currentIntern } });
+        return DialogService.ShowAsync<InternDialog>("Обновить стажёра",
+            new DialogParameters<InternDialog> { { x => x.Intern, currentIntern } });
     }
 
     private Task CreateDialogAsync(Project internship)
@@ -286,11 +286,11 @@
         => DialogService.ShowAsync<ProjectDialog>("Обновить проект",
             new DialogParameters<ProjectDialog> { { x => x.Project, project },
             { x => x.SubmitAction, HandleUpdate }, { x => x.ShowProjectId, true} });
-    
+
 
     private async Task<HttpResponseMessage> HandleCreate(Project project)
         => await Http.PostAsJsonAsync($"api/Project/Create", project);
-    
+
 
     private async Task<HttpResponseMessage> HandleUpdate(Project project)
         => await Http.PutAsJsonAsync($"api/Project/Update/{project.Id}", project);

@@ -9,7 +9,7 @@ namespace InternPortal.Client.Models
         [Required(ErrorMessage = "Введите имя")]
         [StringLength(20, ErrorMessage = "Имя не должно превышать 20 символов")]
         public string FirstName { get; set; }
-        
+
         [Required(ErrorMessage = "Введите фамилию")]
         [StringLength(20, ErrorMessage = "Фамилия не должна превышать 20 символов")]
         public string LastName { get; set; }
