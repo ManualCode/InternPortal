@@ -13,19 +13,12 @@ namespace InternPortal.Infrastructure.Repositories
     {
         public async Task<Guid> AddAsync(Intern entity)
         {
-            var e = Mapping.Mapper.Map<InternEntity>(entity);
             await dbContext.Interns.AddAsync(Mapping.Mapper.Map<InternEntity>(entity));
-            await dbContext.SaveChangesAsync();
-
             return entity.Id;
         }
 
-
         public async Task DeleteAsync(Guid id)
-        {
-            await dbContext.Interns.Where(i => i.Id == id).ExecuteDeleteAsync();
-            await dbContext.SaveChangesAsync();
-        }
+            => await dbContext.Interns.Where(i => i.Id == id).ExecuteDeleteAsync();
 
         public async Task<List<Intern>> GetAllAsync(InternFilter filter)
         {
@@ -64,8 +57,6 @@ namespace InternPortal.Infrastructure.Repositories
             internEntity.InternshipId = entity.Internship.Id;
             internEntity.ProjectId = entity.Project.Id;
             internEntity.UpdatedAt = DateTime.UtcNow;
-
-            await dbContext.SaveChangesAsync();
 
             return id;
         }

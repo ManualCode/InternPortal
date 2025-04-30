@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:7100", "https://localhost:44309", "https://localhost:7252")
+        policy.WithOrigins("http://localhost:7100", "https://localhost:44351")
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials();
@@ -30,9 +30,7 @@ builder.Services.AddDbContext<InternPortalDbContext>(options =>
 builder.Services.AddScoped<IInternService, InternService>();
 builder.Services.AddScoped<IInternshipService, InternshipService>();
 builder.Services.AddScoped<IProjectSevice, ProjectService>();
-builder.Services.AddScoped<IInternRepository, InternRepository>();
-builder.Services.AddScoped<IInternshipRepository, InternshipRepository>();
-builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

@@ -8,29 +8,39 @@ using InternPortal.Domain.Sort;
 
 namespace InternPortal.Application.Services
 {
-    public class InternshipService : IInternshipService
+    public class InternshipService(IUnitOfWork unitOfWork) : IInternshipService
     {
-        private readonly IInternshipRepository internshipRepository;
-
-        public InternshipService(IInternshipRepository internshipRepository)
-            => this.internshipRepository = internshipRepository;
-
         public async Task<Internship> FindOrCreate(Internship internship)
-            => await internshipRepository.FindOrCreateAsync(internship);
+        {
+            var i = await unitOfWork.InternshipRepository.FindOrCreateAsync(internship);
+            unitOfWork.Save();
+            return i;
+        }
 
         public async Task<List<Internship>> GetAllInternships(BaseFilter filter, SortParams sort, PageParams pageParams)
-            => await internshipRepository.GetAllAsync(filter, sort, pageParams);
+            => await unitOfWork.InternshipRepository.GetAllAsync(filter, sort, pageParams);
 
         public Task<Internship?> GetInternshipById(Guid id)
-            => internshipRepository.GetByIdAsync(id);
+            => unitOfWork.InternshipRepository.GetByIdAsync(id);
 
         public async Task DeleteInternship(Guid id)
-            => await internshipRepository.DeleteAsync(id);
+        {
+            await unitOfWork.InternshipRepository.DeleteAsync(id);
+            unitOfWork.Save();
+        }
 
         public async Task<Guid> CreateInternship(Internship internship)
-            => await internshipRepository.AddAsync(internship);
+        {
+            var internshipId = await unitOfWork.InternshipRepository.AddAsync(internship);
+            unitOfWork.Save();
+            return internshipId;
+        }
 
         public async Task<Guid> UpdateInternship(Guid id, Internship entity)
-            => await internshipRepository.UpdateAsync(id, entity); 
+        {
+            var internshipId =  await unitOfWork.InternshipRepository.UpdateAsync(id, entity);
+            unitOfWork.Save();
+            return internshipId;
+        }
     }
 }

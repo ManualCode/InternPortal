@@ -6,29 +6,37 @@ using InternPortal.Domain.Models;
 
 namespace InternPortal.Application.Services
 {
-    public class InternService(IInternRepository internRepository) : IInternService
+    public class InternService(IUnitOfWork unitOfWork) : IInternService
     {
         public async Task<Guid> CreateIntern(Intern intern)
         {
-            if (!await internRepository.IsEmailUniqueAsync(intern.Email))
+            if (!await unitOfWork.InternRepository.IsEmailUniqueAsync(intern.Email))
                 throw new Exception("Email должен быть уникальным");
             if (!string.IsNullOrWhiteSpace(intern.PhoneNumber) 
-                && !await internRepository.IsPhoneNumberUniqueAsync(intern.PhoneNumber))
+                && !await unitOfWork.InternRepository.IsPhoneNumberUniqueAsync(intern.PhoneNumber))
                 throw new Exception("Номер телефона должен быть уникальным");
 
-            return await internRepository.AddAsync(intern);
+            var internId = await unitOfWork.InternRepository.AddAsync(intern);
+            unitOfWork.Save();
+            return internId;
+        }
+        public async Task<Guid> UpdateIntern(Guid id, Intern intern)
+        {
+            await unitOfWork.InternRepository.UpdateAsync(id, intern);
+            unitOfWork.Save();
+            return id;
         }
 
         public async Task<List<Intern>> GetAllInterns(InternFilter filter)
-            => await internRepository.GetAllAsync(filter);
-
-        public async Task<Guid> UpdateIntern(Guid id, Intern intern)
-            => await internRepository.UpdateAsync(id, intern);
-        
-        public async Task DeleteIntern(Guid id)
-            => await internRepository.DeleteAsync(id);
+            => await unitOfWork.InternRepository.GetAllAsync(filter);
 
         public async Task<Intern?> GetInternById(Guid id)
-            => await internRepository.GetByIdAsync(id);
+            => await unitOfWork.InternRepository.GetByIdAsync(id);
+
+        public async Task DeleteIntern(Guid id)
+        {
+            await unitOfWork.InternRepository.DeleteAsync(id);
+            unitOfWork.Save();
+        }
     }
 }

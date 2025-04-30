@@ -30,7 +30,6 @@ namespace InternPortal.Infrastructure.Repositories
             };
 
             await dbContext.Projects.AddAsync(projectEntity);
-            await dbContext.SaveChangesAsync();
 
             return projectEntity.Id;
         }
@@ -46,7 +45,6 @@ namespace InternPortal.Infrastructure.Repositories
                 throw new Exception("Невозможно удалить проект: к нему привязаны стажёры");
 
             await dbContext.Projects.Where(i => i.Id == id).ExecuteDeleteAsync();
-            await dbContext.SaveChangesAsync();
         }
 
         public async Task<Project> FindOrCreateAsync(Project project)
@@ -63,7 +61,6 @@ namespace InternPortal.Infrastructure.Repositories
                     UpdatedAt = DateTime.UtcNow
                 };
                 dbContext.Projects.Add(existingProject);
-                dbContext.SaveChanges();
             }
 
             return Project.Create(existingProject.Name, [], existingProject.CreatedAt, existingProject.UpdatedAt, existingProject.Id);
@@ -99,8 +96,6 @@ namespace InternPortal.Infrastructure.Repositories
 
             projectEntity.Name = entity.Name;
             projectEntity.Interns = existingInterns;
-
-            await dbContext.SaveChangesAsync();
 
             return id;
         }

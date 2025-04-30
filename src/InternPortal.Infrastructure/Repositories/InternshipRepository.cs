@@ -30,7 +30,6 @@ namespace InternPortal.Infrastructure.Repositories
             };
 
             await dbContext.Internships.AddAsync(projectEntity);
-            await dbContext.SaveChangesAsync();
 
             return projectEntity.Id;
         }
@@ -46,7 +45,6 @@ namespace InternPortal.Infrastructure.Repositories
                 throw new Exception("Невозможно удалить направление стажировки: к нему привязаны стажёры");
 
             await dbContext.Internships.Where(i => i.Id == id).ExecuteDeleteAsync();
-            await dbContext.SaveChangesAsync();
         }
 
         public async Task<Internship> FindOrCreateAsync(Internship internship)
@@ -63,7 +61,6 @@ namespace InternPortal.Infrastructure.Repositories
                     UpdatedAt = DateTime.UtcNow
                 };
                 dbContext.Internships.Add(existingInternship);
-                dbContext.SaveChanges();
             }
 
             return Internship.Create(existingInternship.Name, [], existingInternship.CreatedAt, existingInternship.UpdatedAt, existingInternship.Id);
@@ -99,8 +96,6 @@ namespace InternPortal.Infrastructure.Repositories
 
             internshipEntity.Name = entity.Name;
             internshipEntity.Interns = existingInterns;
-
-            await dbContext.SaveChangesAsync();
 
             return id;
         }

@@ -8,25 +8,39 @@ using InternPortal.Domain.Sort;
 
 namespace InternPortal.Application.Services
 {
-    public class ProjectService(IProjectRepository projectRepository, IInternRepository internRepository) : IProjectSevice
+    public class ProjectService(IUnitOfWork unitOfWork) : IProjectSevice
     {
         public async Task<Guid> CreateProject(Project project)
-            => await projectRepository.AddAsync(project);
-        
+        {
+            var projectId = await unitOfWork.ProjectRepository.AddAsync(project);
+            unitOfWork.Save();
+            return projectId;
+        }
+
         public async Task DeleteProject(Guid id)
-            => await projectRepository.DeleteAsync(id);
+        {
+            await unitOfWork.ProjectRepository.DeleteAsync(id);
+            unitOfWork.Save();
+        }
 
         public async Task<Project> FindOrCreate(Project project)
-            => await projectRepository.FindOrCreateAsync(project);
+        {
+            var p = await unitOfWork.ProjectRepository.FindOrCreateAsync(project);
+            unitOfWork.Save();
+            return p;
+        }
 
         public async Task<List<Project>> GetAllProject(BaseFilter filter, SortParams sort, PageParams pageParams)
-            => await projectRepository.GetAllAsync(filter, sort, pageParams);
+            => await unitOfWork.ProjectRepository.GetAllAsync(filter, sort, pageParams);
 
         public async Task<Project?> GetProjectById(Guid id)
-            => await projectRepository.GetByIdAsync(id);
+            => await unitOfWork.ProjectRepository.GetByIdAsync(id);
 
         public async Task<Guid> UpdateProject(Guid id, Project entity)
-            => await projectRepository.UpdateAsync(id, entity);
-
+        {
+            await unitOfWork.ProjectRepository.UpdateAsync(id, entity);
+            unitOfWork.Save();
+            return id;
+        }
     }
 }
