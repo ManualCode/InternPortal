@@ -1,6 +1,6 @@
-@InternPortal.API_HostAddress = http://localhost:5169
+@apiUrl  = https://localhost:7123
 
-GET {{InternPortal.API_HostAddress}}/weatherforecast/
-Accept: application/json
+GET {{apiUrl}}/api/Intern/GetAll
+Content-Type: application/json
 
 ###

@@ -57,8 +57,11 @@ namespace InternPortal.Application.Services
             return interns.Select(Mapping.Mapper.Map<InternResponse>).ToList();
         }
 
-        public async Task<Intern?> GetInternById(Guid id)
-            => await unitOfWork.InternRepository.GetByIdAsync(id);
+        public async Task<InternResponse?> GetInternById(Guid id)
+        {
+            var intern = await unitOfWork.InternRepository.GetByIdAsync(id);
+            return Mapping.Mapper.Map<InternResponse>(intern);
+        }
 
         public async Task DeleteIntern(Guid id)
         {

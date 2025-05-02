@@ -1,5 +1,4 @@
 ﻿using InternPortal.Domain.Filters;
-using InternPortal.Domain.Models;
 using InternPortal.Shared.Contracts.Intern.Requests;
 using InternPortal.Shared.Contracts.Intern.Responses;
 
@@ -16,6 +15,6 @@ namespace InternPortal.Application.Abstractions.Services
 
         Task<Guid> UpdateIntern(Guid id, InternRequest internRequest);
 
-        Task<Intern?> GetInternById (Guid id);
+        Task<InternResponse?> GetInternById (Guid id);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using InternPortal.Domain.Filters;
-using InternPortal.Domain.Models;
 using InternPortal.Domain.Pagination;
 using InternPortal.Domain.Sort;
 using InternPortal.Shared.Contracts.Internship.Requests;

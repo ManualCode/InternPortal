@@ -1,9 +1,7 @@
 ﻿using InternPortal.Shared.Contracts.Intern.Responses;
 using InternPortal.Application.Abstractions.Services;
 using InternPortal.Shared.Contracts.Intern.Requests;
-using InternPortal.Infrastructure.Mappers;
 using InternPortal.Domain.Filters;
-using InternPortal.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -19,7 +17,7 @@ namespace InternPortal.API.Controllers
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<InternResponse>> GetById(Guid id)
-            => Ok(Mapping.Mapper.Map<InternResponse>(await internService.GetInternById(id)));
+            => Ok(await internService.GetInternById(id));
 
         [HttpPost]
         public async Task<ActionResult<Guid>> Create([FromBody] InternRequest request)
