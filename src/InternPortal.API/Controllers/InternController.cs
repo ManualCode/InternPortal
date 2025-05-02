@@ -27,13 +27,7 @@ namespace InternPortal.API.Controllers
 
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<Guid>> Update(Guid id, [FromBody] InternRequest request)
-        {
-
-            //var intern = Intern.Create(request.FirstName, request.LastName, Enum.Parse<Gender>(request.Gender),
-            //    request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreateAt, request.UpdateAt);
-
-            return Ok(await internService.UpdateIntern(id, request));
-        }
+            => Ok(await internService.UpdateIntern(id, request));
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<Guid>> Delete(Guid id)

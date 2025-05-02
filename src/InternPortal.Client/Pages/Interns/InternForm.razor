@@ -45,6 +45,7 @@
         <MudItem xs="12" md="6" class="pa-2">
             <MudSelect Label="Пол"
                        For="@(() => Intern.Gender)"
+                       Text ="@(Intern.Gender != null ? Enum.Parse<Gender>(Intern.Gender).ToString() : "")"
                        @bind-Value="Intern.Gender"
                        Variant="Variant.Outlined"
                        Required="true"
@@ -76,7 +77,8 @@
         <MudItem xs="12" md="6" class="pa-2">
             <MudDatePicker Label="Дата рождения"
                            Mask="@(new DateMask("dd.MM.yyyy"))"
-                           @bind-Date="Intern.BirthDate"
+                           Date="Intern.BirthDate"
+                           DateChanged="@((DateTime? newDate) => Intern.BirthDate = newDate ?? DateTime.UtcNow)"
                            Variant="Variant.Outlined"
                            Required="true"
                            Editable="true"
@@ -191,28 +193,16 @@
         if (response.IsSuccessStatusCode)
         {
             Intern.Id = response.Content.ReadFromJsonAsync<Guid>().Result;
-            var listIntern = new InternForList
-            {
-                Id = Intern.Id,
-                FullName = $"{Intern.FirstName} {Intern.LastName}",
-                Gender = Intern.Gender,
-                BirthDate = Intern.BirthDate ?? DateTime.UtcNow,
-                Email = Intern.Email,
-                PhoneNumber = Intern.PhoneNumber,
-                Internship = new Internship { Id = Guid.Empty, Name = Intern.Internship, Interns = new() },
-                Project = new Project { Id = Guid.Empty, Name = Intern.Project, Interns = new() },
-                CreateAt = Intern.CreateAt,
-                UpdateAt = Intern.UpdateAt
-            };
+            var listIntern = Intern;
             if (ShowInternId)
             {
-                InternHub?.Sender("Editor", listIntern);
+                InternHub?.Sender("Editor", Intern);
                 Navigation.NavigateTo("/interns");
                 Snackbar.Add("Запись успешно обновлена", Severity.Success);
             }
             else
             {
-                InternHub?.Sender("Sender", listIntern);
+                InternHub?.Sender("Sender", Intern);
                 Intern = new Intern();
                 Snackbar.Add("Запись успешно добавлена", Severity.Success);
             }

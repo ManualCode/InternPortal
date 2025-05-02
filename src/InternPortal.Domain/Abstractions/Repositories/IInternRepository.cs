@@ -8,9 +8,9 @@ namespace InternPortal.Domain.Abstractions.Repositories
     {
         Task<List<Intern>> GetAllAsync(InternFilter filter);
 
-        Task<bool> IsEmailUniqueAsync(string email);
+        Task<bool> IsEmailUniqueAsync(string email, Guid? excludeInternId = null);
 
-        Task<bool> IsPhoneNumberUniqueAsync(string? phoneNumber);
+        Task<bool> IsPhoneNumberUniqueAsync(string phoneNumber, Guid? excludeInternId = null);
 
     }
 }

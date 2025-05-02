@@ -1,9 +1,9 @@
 ﻿@page "/interns"
-@using Microsoft.AspNetCore.WebUtilities
-@inject NavigationManager Navigation
-@using InternPortal.Client.Models
 @using InternPortal.Client.Components.SignalR
+@using Microsoft.AspNetCore.WebUtilities
+@using InternPortal.Client.Models
 @inject HttpClient Http
+@inject NavigationManager Navigation
 @inject IDialogService DialogService
 @inject IConfiguration Configuration
 
@@ -59,13 +59,13 @@
             <MudTh Style="width: 10%; text-align: center;">Действия</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="ФИО" Class="font-weight-bold">@context.FullName</MudTd>
+            <MudTd DataLabel="ФИО" Class="font-weight-bold">@($"{context.LastName} {context.FirstName}")</MudTd>
             <MudTd DataLabel="Дата рождения">@context.BirthDate.ToString("dd.MM.yyyy")</MudTd>
-            <MudTd DataLabel="Пол">@context.Gender.ToString()</MudTd>
+            <MudTd DataLabel="Пол">@(Enum.Parse<Gender>(context.Gender))</MudTd>
             <MudTd DataLabel="Email">@context.Email</MudTd>
-            <MudTd DataLabel="Номер">@context.PhoneNumber</MudTd>
-            <MudTd DataLabel="Направление">@context.Internship.Name</MudTd>
-            <MudTd DataLabel="Проект">@context.Project.Name</MudTd>
+            <MudTd DataLabel="Номер">@(string.IsNullOrEmpty(context.PhoneNumber) ? "Отсутствует" : context.PhoneNumber)</MudTd>
+            <MudTd DataLabel="Направление">@context.Internship</MudTd>
+            <MudTd DataLabel="Проект">@context.Project</MudTd>
             <MudTd DataLabel="Действие" Style="text-align: center;">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary"
@@ -81,13 +81,11 @@
 
 
 @code {
-    private Intern CurrentIntern = new();
-
     private InternHub? InternHub;
 
-    private List<InternForList> AllInterns = new();
+    private List<Intern> AllInterns = new();
 
-    private List<InternForList> FilteredInterns = new();
+    private List<Intern> FilteredInterns = new();
 
     private List<string> AvailableInternships = new();
 
@@ -101,14 +99,14 @@
     {
         InternHub = new InternHub(Configuration);
 
-        InternHub.Receiver<InternForList>("Receive", intern =>
+        InternHub.Receiver<Intern>("Receive", intern =>
         {
             AllInterns.Add(intern);
             ApplyFilters();
             InvokeAsync(StateHasChanged);
         });
 
-        InternHub.Receiver<InternForList>("ReceiveEdit", intern =>
+        InternHub.Receiver<Intern>("ReceiveEdit", intern =>
         {
             AllInterns[AllInterns.FindIndex(x => x.Id == intern.Id)] = intern;
             ApplyFilters();
@@ -134,9 +132,9 @@
 
     private async Task LoadData()
     {
-        AllInterns = await Http.GetFromJsonAsync<List<InternForList>>("api/Intern/GetAll") ?? new();
-        AvailableInternships = AllInterns.Select(i => i.Internship.Name).Distinct().ToList();
-        AvailableProjects = AllInterns.Select(i => i.Project.Name).Distinct().ToList();
+        AllInterns = await Http.GetFromJsonAsync<List<Intern>>("api/Intern/GetAll") ?? new();
+        AvailableInternships = AllInterns.Select(i => i.Internship).Distinct().ToList();
+        AvailableProjects = AllInterns.Select(i => i.Project).Distinct().ToList();
     }
 
     private void ApplyFilters()
@@ -149,8 +147,8 @@
 
         Navigation.NavigateTo(QueryHelpers.AddQueryString("/interns", queryParams));
 
-        FilteredInterns = AllInterns.Where(i => (SelectedInternship == null || i.Internship.Name == SelectedInternship)
-            && (SelectedProject == null || i.Project.Name == SelectedProject)).ToList();
+        FilteredInterns = AllInterns.Where(i => (SelectedInternship == null || i.Internship == SelectedInternship)
+            && (SelectedProject == null || i.Project == SelectedProject)).ToList();
     }
 
     private void ResetFilters()
@@ -161,23 +159,7 @@
         Navigation.NavigateTo("/interns");
     }
 
-    private Task OpenDialogAsync(InternForList intern)
-    {
-        CurrentIntern = new Intern
-        {
-            Id = intern.Id,
-            FirstName = intern.FullName.Split(' ')[0],
-            LastName = intern.FullName.Split(' ')[1],
-            Gender = intern.Gender.ToString(),
-            Email = intern.Email,
-            PhoneNumber = intern.PhoneNumber,
-            BirthDate = intern.BirthDate,
-            Internship = intern.Internship.Name,
-            Project = intern.Project.Name,
-            CreateAt = intern.CreateAt,
-            UpdateAt = intern.UpdateAt
-        };
-        return DialogService.ShowAsync<InternDialog>("Обновить данные стажёра",
-            new DialogParameters<InternDialog> { { x => x.Intern, CurrentIntern } });
-    }
+    private Task OpenDialogAsync(Intern intern)
+        => DialogService.ShowAsync<InternDialog>("Обновить данные стажёра",
+            new DialogParameters<InternDialog> { { x => x.Intern, intern } });
 }

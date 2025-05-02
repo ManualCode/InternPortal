@@ -27,7 +27,7 @@ namespace InternPortal.Client.Models
 
         [Required(ErrorMessage = "Укажите дату рождения")]
         [DataType(DataType.Date)]
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
 
         [Required(ErrorMessage = "Укажите направление стажирвоки")]
         public string Internship { get; set; }

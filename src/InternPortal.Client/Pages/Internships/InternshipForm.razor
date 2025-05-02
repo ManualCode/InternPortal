@@ -44,8 +44,8 @@
                 {
                     <MudSelectItem T="Guid"
                                    Value="@intern.Id"
-                                   Disabled="@(selectedInternIds.Contains(intern.Id) && !CanDeselect)">
-                        @intern.FullName
+                                   Disabled="@(tempInternIds.Contains(intern.Id) && !CanDeselect)">
+                        @($"{intern.LastName} {intern.FirstName}")
                     </MudSelectItem>
                 }
             </MudSelect>
@@ -105,9 +105,11 @@
     [Parameter]
     public Internship Internship { get; set; } = new();
 
-    private List<InternForList>? Interns { get; set; } = new();
+    private List<Intern>? Interns { get; set; } = new();
 
     private IEnumerable<Guid> selectedInternIds = new HashSet<Guid>();
+
+    private IEnumerable<Guid> tempInternIds = new HashSet<Guid>();
 
     private bool CanDeselect = false;
 
@@ -119,9 +121,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Interns = await Http.GetFromJsonAsync<List<InternForList>>("/api/Intern/GetAll");
+        Interns = await Http.GetFromJsonAsync<List<Intern>>("/api/Intern/GetAll");
         if (ShowInternshipId)
+        {
             selectedInternIds = Internship.Interns;
+            tempInternIds = Internship.Interns;
+        }
+
     }
 
     private async Task HandleValidSubmit()

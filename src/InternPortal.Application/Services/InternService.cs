@@ -33,10 +33,10 @@ namespace InternPortal.Application.Services
 
         public async Task<Guid> UpdateIntern(Guid id, InternRequest internRequest)
         {
-            if (!await unitOfWork.InternRepository.IsEmailUniqueAsync(internRequest.Email))
+            if (!await unitOfWork.InternRepository.IsEmailUniqueAsync(internRequest.Email, id))
                 throw new Exception("Email должен быть уникальным");
             if (!string.IsNullOrWhiteSpace(internRequest.PhoneNumber)
-                && !await unitOfWork.InternRepository.IsPhoneNumberUniqueAsync(internRequest.PhoneNumber))
+                && !await unitOfWork.InternRepository.IsPhoneNumberUniqueAsync(internRequest.PhoneNumber, id))
                 throw new Exception("Номер телефона должен быть уникальным");
 
             var internship = await unitOfWork.InternshipRepository.FindOrCreateAsync(internRequest.Internship);

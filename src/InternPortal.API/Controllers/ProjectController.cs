@@ -14,7 +14,7 @@ namespace InternPortal.API.Controllers
     public class ProjectController(IProjectSevice projectService) : Controller
     {
         [HttpGet]
-        public async Task<ActionResult<List<ProjectResponse>>> GetAll([FromQuery] BaseFilter filter,
+        public async Task<ActionResult<PagedProjectResponse>> GetAll([FromQuery] BaseFilter filter,
             [FromQuery] SortParams sort, [FromQuery] PageParams pageParams)
             => Ok(await projectService.GetAllProject(filter, sort, pageParams));
 

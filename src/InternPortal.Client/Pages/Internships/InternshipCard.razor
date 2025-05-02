@@ -93,7 +93,7 @@
                                 {
                                     @foreach (var intern in AvailableInterns)
                                     {
-                                        <MudMenuItem @onclick="(() => OpenInternDialogAsync(intern))">@intern.FullName</MudMenuItem>
+                                        <MudMenuItem @onclick="(() => OpenInternDialogAsync(intern))">@($"{intern.LastName} {intern.FirstName}")</MudMenuItem>
                                     }
                                 }
                                 else
@@ -154,7 +154,7 @@
 @code{
     private List<Internship> Internships = new();
 
-    private List<InternForList?> AvailableInterns = new();
+    private List<Intern?> AvailableInterns = new();
 
     private string? Filter { get; set; }
 
@@ -251,29 +251,16 @@
 
     private async Task GetInterns(List<Guid> internIds)
     {
-        var interns = new List<InternForList?>();
+        var interns = new List<Intern?>();
         foreach (var id in internIds)
-            interns.Add(await Http.GetFromJsonAsync<InternForList>($"api/Intern/GetById/{id}"));
+            interns.Add(await Http.GetFromJsonAsync<Intern>($"api/Intern/GetById/{id}"));
 
         AvailableInterns = interns;
     }
 
-    private Task OpenInternDialogAsync(InternForList intern)
+    private Task OpenInternDialogAsync(Intern intern)
     {
-        var currentIntern = new Intern
-        {
-            Id = intern.Id,
-            FirstName = intern.FullName.Split(' ')[0],
-            LastName = intern.FullName.Split(' ')[1],
-            Gender = intern.Gender.ToString(),
-            Email = intern.Email,
-            PhoneNumber = intern.PhoneNumber,
-            BirthDate = intern.BirthDate,
-            Internship = intern.Internship.Name,
-            Project = intern.Project.Name,
-            CreateAt = intern.CreateAt,
-            UpdateAt = intern.UpdateAt
-        };
+        var currentIntern = intern;
         return DialogService.ShowAsync<InternDialog>("Обновить стажёра",
             new DialogParameters<InternDialog> { { x => x.Intern, currentIntern } });
     }

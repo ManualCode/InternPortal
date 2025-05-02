@@ -5,13 +5,14 @@ namespace InternPortal.Shared.Contracts.Intern.Responses
 {
     public sealed record InternResponse(
     Guid Id,
-    string FullName,
+    string FirstName,
+    string LastName,
     string Gender,
     DateTime BirthDate,
     string Email,
     string? PhoneNumber,
-    InternshipResponse Internship,
-    ProjectResponse Project,
+    string Internship,
+    string Project,
     DateTime CreateAt,
     DateTime UpdateAt);
 }

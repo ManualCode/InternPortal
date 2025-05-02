@@ -59,10 +59,24 @@ namespace InternPortal.Infrastructure.Repositories
             return id;
         }
 
-        public async Task<bool> IsEmailUniqueAsync(string email)
-            => !await dbContext.Interns.AnyAsync(u => u.Email == email);
+        public async Task<bool> IsEmailUniqueAsync(string email, Guid? excludeInternId = null)
+        {
+            var query = dbContext.Interns.Where(u => u.Email == email);
 
-        public async Task<bool> IsPhoneNumberUniqueAsync(string phoneNumber)
-            => !await dbContext.Interns.AnyAsync(u => u.PhoneNumber == phoneNumber);
+            if (excludeInternId != null)
+                query = query.Where(u => u.Id != excludeInternId.Value);
+
+            return !await query.AnyAsync();
+        }
+
+        public async Task<bool> IsPhoneNumberUniqueAsync(string phoneNumber, Guid? excludeInternId = null)
+        {
+            var query = dbContext.Interns.Where(u => u.PhoneNumber == phoneNumber);
+
+            if (excludeInternId != null)
+                query = query.Where(u => u.Id != excludeInternId.Value);
+
+            return !await query.AnyAsync();
+        }
     }
 }
