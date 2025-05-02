@@ -12,6 +12,6 @@ namespace InternPortal.Domain.Abstractions.Repositories
         IProjectRepository ProjectRepository { get; }
         IInternshipRepository InternshipRepository { get; }
 
-        void Save();
+        Task Save();
     }
 }

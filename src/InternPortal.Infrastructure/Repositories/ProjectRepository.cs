@@ -1,6 +1,5 @@
 ﻿using InternPortal.Domain.Abstractions.Repositories;
 using InternPortal.Infrastructure.Extensions;
-using InternPortal.Infrastructure.Entities;
 using InternPortal.Infrastructure.Mappers;
 using InternPortal.Infrastructure.Data;
 using InternPortal.Domain.Pagination;
@@ -20,7 +19,7 @@ namespace InternPortal.Infrastructure.Repositories
                 .Where(i => project.InternIds.Contains(i.Id))
                 .ToListAsync();
 
-            var projectEntity = new ProjectEntity
+            var projectEntity = new Project
             {
                 Id = project.Id,
                 Name = project.Name,
@@ -47,26 +46,26 @@ namespace InternPortal.Infrastructure.Repositories
             await dbContext.Projects.Where(i => i.Id == id).ExecuteDeleteAsync();
         }
 
-        public async Task<Project> FindOrCreateAsync(Project project)
+        public async Task<Project> FindOrCreateAsync(string name)
         {
-            var existingProject = await dbContext.Projects.FirstOrDefaultAsync(p => p.Name == project.Name);
+            var existingProject = await dbContext.Projects.FirstOrDefaultAsync(p => p.Name == name);
 
             if (existingProject == null)
             {
-                existingProject = new ProjectEntity
+                existingProject = new Project
                 {
-                    Id = project.Id,
-                    Name = project.Name,
+                    Id = Guid.NewGuid(),
+                    Name = name,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
                 dbContext.Projects.Add(existingProject);
             }
 
-            return Project.Create(existingProject.Name, [], existingProject.CreatedAt, existingProject.UpdatedAt, existingProject.Id);
+            return existingProject;
         }
 
-        public async Task<List<Project>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams page)
+        public async Task<PagedResult<Project>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams page)
         {
             var projectEntities = await dbContext.Projects
                 .AsNoTracking()
@@ -74,10 +73,9 @@ namespace InternPortal.Infrastructure.Repositories
                 .Include(i => i.Interns)
                     .ThenInclude(x => x.Internship)
                 .Sort(sort)
-                .Page(page)
-                .ToListAsync();
+                .Page(page);
 
-            return projectEntities.Select(Mapping.Mapper.Map<Project>).ToList();
+            return projectEntities;
         }
 
         public async Task<Project?> GetByIdAsync(Guid id)

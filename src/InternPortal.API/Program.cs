@@ -1,10 +1,13 @@
-using InternPortal.API.Hubs;
+
 using InternPortal.Application.Abstractions.Services;
-using InternPortal.Application.Services;
+
 using InternPortal.Domain.Abstractions.Repositories;
-using InternPortal.Infrastructure.Data;
+
 using InternPortal.Infrastructure.Repositories;
+using InternPortal.Application.Services;
+using InternPortal.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using InternPortal.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,10 +1,8 @@
 ﻿using InternPortal.Shared.Contracts.Project.Responses;
 using InternPortal.Application.Abstractions.Services;
 using InternPortal.Shared.Contracts.Project.Requests;
-using InternPortal.Infrastructure.Mappers;
 using InternPortal.Domain.Pagination;
 using InternPortal.Domain.Filters;
-using InternPortal.Domain.Models;
 using InternPortal.Domain.Sort;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,27 +14,21 @@ namespace InternPortal.API.Controllers
     public class ProjectController(IProjectSevice projectService) : Controller
     {
         [HttpGet]
-        public async Task<ActionResult<List<ProjectResponse>>> GetAll([FromQuery] BaseFilter filter, [FromQuery] SortParams sort, [FromQuery] PageParams pageParams)
-        {
-            var projects = await projectService.GetAllProject(filter, sort, pageParams);
-            //плохо
-            var projectCount = (await projectService.GetAllProject(filter, sort, null)).Count;
-
-            return Ok(new PagedProjectResponse(projectCount,
-                projects.Select(Mapping.Mapper.Map<ProjectResponse>).ToList()));
-        }
+        public async Task<ActionResult<List<ProjectResponse>>> GetAll([FromQuery] BaseFilter filter,
+            [FromQuery] SortParams sort, [FromQuery] PageParams pageParams)
+            => Ok(await projectService.GetAllProject(filter, sort, pageParams));
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<ProjectResponse>> GetById(Guid id)
-            => Ok(Mapping.Mapper.Map<ProjectResponse>(await projectService.GetProjectById(id)));
+            => Ok(await projectService.GetProjectById(id));
 
         [HttpPost]
         public async Task<ActionResult<Guid>> Create([FromBody] ProjectRequest request)
-            => Ok(await projectService.CreateProject(Mapping.Mapper.Map<Project>(request)));
+            => Ok(await projectService.CreateProject(request));
 
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<Guid>> Update(Guid id, [FromBody] ProjectRequest request)
-            => Ok(await projectService.UpdateProject(id, Mapping.Mapper.Map<Project>(request)));
+            => Ok(await projectService.UpdateProject(id, request));
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<Guid>> DeleteById(Guid id)

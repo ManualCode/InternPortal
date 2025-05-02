@@ -2,22 +2,22 @@
 using InternPortal.Domain.Models;
 using InternPortal.Domain.Pagination;
 using InternPortal.Domain.Sort;
+using InternPortal.Shared.Contracts.Internship.Requests;
+using InternPortal.Shared.Contracts.Internship.Responses;
 
 
 namespace InternPortal.Application.Abstractions.Services
 {
     public interface IInternshipService
     {
-        Task<List<Internship>> GetAllInternships(BaseFilter filter, SortParams sort, PageParams pageParams);
+        Task<PagedInternshipResponse> GetAllInternships(BaseFilter filter, SortParams sort, PageParams pageParams);
 
-        Task<Internship?> GetInternshipById(Guid id);
-
-        Task<Internship> FindOrCreate(Internship internship);
+        Task<InternshipResponse?> GetInternshipById(Guid id);
 
         Task DeleteInternship(Guid id);
 
-        Task<Guid> CreateInternship(Internship internship);
+        Task<Guid> CreateInternship(InternshipRequest internship);
 
-        Task<Guid> UpdateInternship(Guid id, Internship entity);
+        Task<Guid> UpdateInternship(Guid id, InternshipRequest internshipRequest);
     }
 }

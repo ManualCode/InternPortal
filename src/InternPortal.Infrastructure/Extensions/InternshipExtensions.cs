@@ -2,29 +2,27 @@
 using InternPortal.Domain.Models;
 using InternPortal.Domain.Pagination;
 using InternPortal.Domain.Sort;
-using InternPortal.Infrastructure.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace InternPortal.Infrastructure.Extensions
 {
     public static class InternshipExtensions
     {
-        public static IQueryable<InternshipEntity> Page(this IQueryable<InternshipEntity> query, PageParams pageParams)
+        public static async Task<PagedResult<Internship>> Page(this IQueryable<Internship> query, PageParams pageParams)
         {
-            if (pageParams == null) return query;
+            var count = await query.CountAsync();
+            if (count == 0) return new PagedResult<Internship>(count, []);
+
             var page = pageParams.Page ?? 1;
             var pageSize = pageParams.PageSize ?? 10;
-            
             var skip = (page -1 ) * pageSize;
-            return query.Skip(skip).Take(pageSize);
+
+            return new PagedResult<Internship>(count, await query.Skip(skip).Take(pageSize).ToListAsync());
         }
 
-        public static IQueryable<InternshipEntity> Filter(this IQueryable<InternshipEntity> query, BaseFilter internshipFilter)
+        public static IQueryable<Internship> Filter(this IQueryable<Internship> query, BaseFilter internshipFilter)
         {
             if (internshipFilter is not null && !string.IsNullOrWhiteSpace(internshipFilter.Name))
                 query = query.Where(x => x.Name.ToLower().Contains(internshipFilter.Name.ToLower()));
@@ -32,22 +30,22 @@ namespace InternPortal.Infrastructure.Extensions
             return query;
         }
 
-        public static IQueryable<InternshipEntity> Sort(this IQueryable<InternshipEntity> query, SortParams sort)
+        public static IQueryable<Internship> Sort(this IQueryable<Internship> query, SortParams sort)
         {
             return sort.SortDirection == SortDirection.Descending
                 ? query.OrderByDescending(GetKeySelector(sort.OrderBy))
                 : query.OrderBy(GetKeySelector(sort.OrderBy));
         }
 
-        private static Expression<Func<InternshipEntity, object>> GetKeySelector(string orderBy)
+        private static Expression<Func<Internship, object>> GetKeySelector(string orderBy)
         {
             if (string.IsNullOrEmpty(orderBy))
                 return x => x.CreatedAt;
 
             return orderBy switch
             {
-                nameof(InternshipEntity.Name) => x => x.Name,
-                nameof(InternshipEntity.Interns) => x => x.Interns.Count,
+                nameof(Internship.Name) => x => x.Name,
+                nameof(Internship.Interns) => x => x.Interns.Count,
                 _ => x => x.UpdatedAt
             };
         }

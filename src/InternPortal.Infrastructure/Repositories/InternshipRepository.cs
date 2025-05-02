@@ -1,6 +1,5 @@
 ﻿using InternPortal.Domain.Abstractions.Repositories;
 using InternPortal.Infrastructure.Extensions;
-using InternPortal.Infrastructure.Entities;
 using InternPortal.Infrastructure.Mappers;
 using InternPortal.Infrastructure.Data;
 using InternPortal.Domain.Pagination;
@@ -20,7 +19,7 @@ namespace InternPortal.Infrastructure.Repositories
                 .Where(i => entity.InternIds.Contains(i.Id))
                 .ToListAsync();
 
-            var projectEntity = new InternshipEntity
+            var projectEntity = new Internship
             {
                 Id = entity.Id,
                 Name = entity.Name,
@@ -47,37 +46,36 @@ namespace InternPortal.Infrastructure.Repositories
             await dbContext.Internships.Where(i => i.Id == id).ExecuteDeleteAsync();
         }
 
-        public async Task<Internship> FindOrCreateAsync(Internship internship)
+        public async Task<Internship> FindOrCreateAsync(string name)
         {
-            var existingInternship = await dbContext.Internships.FirstOrDefaultAsync(i => i.Name == internship.Name);
+            var existingInternship = await dbContext.Internships.FirstOrDefaultAsync(i => i.Name == name);
 
             if (existingInternship == null)
             {
-                existingInternship = new InternshipEntity
+                existingInternship = new Internship
                 {
-                    Id = internship.Id,
-                    Name = internship.Name,
+                    Id = Guid.NewGuid(),
+                    Name = name,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
                 dbContext.Internships.Add(existingInternship);
             }
 
-            return Internship.Create(existingInternship.Name, [], existingInternship.CreatedAt, existingInternship.UpdatedAt, existingInternship.Id);
+            return existingInternship;
         }
 
-        public async Task<List<Internship>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams pageParams)
+        public async Task<PagedResult<Internship>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams pageParams)
         {
-            var internshipEntities = await dbContext.Internships
+            var internships = await dbContext.Internships
                 .AsNoTracking()
                 .Filter(filter)
                 .Include(i => i.Interns)
                     .ThenInclude(x => x.Project)
                 .Sort(sort)
-                .Page(pageParams)
-                .ToListAsync();
+                .Page(pageParams);
 
-            return internshipEntities.Select(Mapping.Mapper.Map<Internship>).ToList();
+            return internships;
         }
 
         public async Task<Internship?> GetByIdAsync(Guid id)

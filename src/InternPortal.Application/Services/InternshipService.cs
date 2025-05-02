@@ -4,42 +4,44 @@ using InternPortal.Domain.Filters;
 using InternPortal.Domain.Models;
 using InternPortal.Domain.Pagination;
 using InternPortal.Domain.Sort;
+using InternPortal.Infrastructure.Mappers;
+using InternPortal.Shared.Contracts.Internship.Requests;
+using InternPortal.Shared.Contracts.Internship.Responses;
 
 
 namespace InternPortal.Application.Services
 {
     public class InternshipService(IUnitOfWork unitOfWork) : IInternshipService
     {
-        public async Task<Internship> FindOrCreate(Internship internship)
+        public async Task<PagedInternshipResponse> GetAllInternships(BaseFilter filter, SortParams sort, PageParams pageParams)
         {
-            var i = await unitOfWork.InternshipRepository.FindOrCreateAsync(internship);
-            unitOfWork.Save();
-            return i;
+            var internships = await unitOfWork.InternshipRepository.GetAllAsync(filter, sort, pageParams);
+            return Mapping.Mapper.Map<PagedInternshipResponse>(internships);
         }
 
-        public async Task<List<Internship>> GetAllInternships(BaseFilter filter, SortParams sort, PageParams pageParams)
-            => await unitOfWork.InternshipRepository.GetAllAsync(filter, sort, pageParams);
-
-        public Task<Internship?> GetInternshipById(Guid id)
-            => unitOfWork.InternshipRepository.GetByIdAsync(id);
+        public async Task<InternshipResponse?> GetInternshipById(Guid id)
+        {
+            var internship = await unitOfWork.InternshipRepository.GetByIdAsync(id);
+            return Mapping.Mapper.Map<InternshipResponse>(internship);
+        }
 
         public async Task DeleteInternship(Guid id)
         {
             await unitOfWork.InternshipRepository.DeleteAsync(id);
-            unitOfWork.Save();
+            await unitOfWork.Save();
         }
 
-        public async Task<Guid> CreateInternship(Internship internship)
+        public async Task<Guid> CreateInternship(InternshipRequest internshipRequest)
         {
-            var internshipId = await unitOfWork.InternshipRepository.AddAsync(internship);
-            unitOfWork.Save();
+            var internshipId = await unitOfWork.InternshipRepository.AddAsync(Mapping.Mapper.Map<Internship>(internshipRequest));
+            await unitOfWork.Save();
             return internshipId;
         }
 
-        public async Task<Guid> UpdateInternship(Guid id, Internship entity)
+        public async Task<Guid> UpdateInternship(Guid id, InternshipRequest internshipRequest)
         {
-            var internshipId =  await unitOfWork.InternshipRepository.UpdateAsync(id, entity);
-            unitOfWork.Save();
+            var internshipId =  await unitOfWork.InternshipRepository.UpdateAsync(id, Mapping.Mapper.Map<Internship>(internshipRequest));
+            await unitOfWork.Save();
             return internshipId;
         }
     }

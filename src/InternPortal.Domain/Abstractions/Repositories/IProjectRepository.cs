@@ -8,8 +8,8 @@ namespace InternPortal.Domain.Abstractions.Repositories
 {
     public interface IProjectRepository : IRepository<Project>
     {
-        Task<List<Project>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams page);
-        Task<Project> FindOrCreateAsync(Project project);
+        Task<PagedResult<Project>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams page);
+        Task<Project> FindOrCreateAsync(string name);
 
     }
 }

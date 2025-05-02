@@ -1,61 +1,34 @@
-﻿using System.Net.Mail;
-using System.Text.RegularExpressions;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace InternPortal.Domain.Models
 {
     public class Intern
     {
-        private Intern(Guid id, string firstName, string lastName, Gender gender, string email, string? phoneNumber,
-            DateTime birthDate, Internship internship, Project project, DateTime createdAt, DateTime updatedAt)
-        {
-            Id = id;
-            FirstName = firstName;
-            LastName = lastName;
-            Gender = gender;
-            Email = email;
-            BirthDate = birthDate;
-            PhoneNumber = phoneNumber;
-            Internship = internship;
-            Project = project;
-            CreateAt = createdAt;
-            UpdateAt = updatedAt;
-        }
+        [Key]
+        public Guid Id { get; set; }
 
-        public Guid Id { get; }
+        public string FirstName { get; set; } = string.Empty;
 
-        public string FirstName { get; }
+        public string LastName { get; set; } = string.Empty;
 
-        public string LastName { get; }
+        public int Gender { get; set; }
 
-        public Gender Gender { get; }
+        public string Email { get; set; } = string.Empty;
 
-        public string Email { get; }
+        public string? PhoneNumber { get; set; }
 
-        public string? PhoneNumber { get; }
+        public DateTime BirthDate { get; set; }
 
-        public DateTime BirthDate { get; }
+        public Guid InternshipId { get; set; }
 
-        public Internship Internship { get; }
+        public Internship Internship { get; set; }
 
-        public Project Project { get; }
+        public Guid ProjectId { get; set; }
 
-        public DateTime CreateAt { get; }
+        public Project Project { get; set; }
 
-        public DateTime UpdateAt { get; }
+        public DateTime CreateAt { get; set; }
 
-
-        public static Intern Create(string firstName, string lastName, Gender gender, string email, string? phoneNumber,
-            DateTime birthDate, Internship internship, Project project, DateTime createdAt, DateTime updatedAt, Guid? id = null)
-        {
-            MailAddress? _mail;
-
-            if (string.IsNullOrWhiteSpace(email) && !MailAddress.TryCreate(email, out _mail))
-                throw new Exception("Неккоректный адрес");
-
-            if (!string.IsNullOrWhiteSpace(phoneNumber) && !Regex.IsMatch(phoneNumber, @"^(\+7\d{10})?$"))
-                throw new Exception("Некорректный номер телефона");
-
-            return new Intern(id ?? Guid.NewGuid(), firstName, lastName, gender, email, phoneNumber, birthDate, internship, project, createdAt, updatedAt);
-        }
+        public DateTime UpdateAt { get; set; }
     }
 }

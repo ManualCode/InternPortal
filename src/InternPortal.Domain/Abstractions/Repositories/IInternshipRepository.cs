@@ -8,7 +8,7 @@ namespace InternPortal.Domain.Abstractions.Repositories
 {
     public interface IInternshipRepository : IRepository<Internship>
     {
-        Task<List<Internship>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams pageParams);
-        Task<Internship> FindOrCreateAsync(Internship internship);
+        Task<PagedResult<Internship>> GetAllAsync(BaseFilter filter, SortParams sort, PageParams pageParams);
+        Task<Internship> FindOrCreateAsync(string name);
     }
 }

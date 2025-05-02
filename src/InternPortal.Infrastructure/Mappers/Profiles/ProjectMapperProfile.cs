@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using InternPortal.Domain.Models;
-using InternPortal.Infrastructure.Entities;
 using InternPortal.Shared.Contracts.Project.Requests;
 using InternPortal.Shared.Contracts.Project.Responses;
+using System.Net.Http.Headers;
 
 
 namespace InternPortal.Infrastructure.Mappers.Profiles
@@ -11,18 +11,16 @@ namespace InternPortal.Infrastructure.Mappers.Profiles
     {
         public ProjectMapperProfile()
         {
-            CreateMap<ProjectEntity, Project>()
-                .ConstructUsing((ProjectEntity pe) =>
-                Project.Create(pe.Name, pe.Interns.Select(x => x.Id).ToList(), pe.CreatedAt, pe.UpdatedAt, pe.Id))
-                .PreserveReferences();
-
-            CreateMap<Project, ProjectEntity>();
-
             CreateMap<ProjectRequest, Project>()
-                .ConstructUsing((ProjectRequest pr) => Project.Create(pr.Name, pr.interns, pr.CreateAt, pr.UpdateAt, null));
+                .ConstructUsing((ProjectRequest pr) => new Project {Id = Guid.NewGuid(), Name = pr.Name, InternIds = pr.interns, CreatedAt = pr.CreateAt, UpdatedAt = pr.UpdateAt})
+                .ForMember(dest => dest.Interns, opt => opt.Ignore());
 
             CreateMap<Project, ProjectResponse>()
-                .ConstructUsing((Project p) => new ProjectResponse(p.Id, p.Name, p.InternIds.ToList(), p.CreatedAt, p.UpdatedAt));
+                .ConstructUsing((Project p) => new ProjectResponse(p.Id, p.Name, p.Interns.Select(x => x.Id).ToList(), p.CreatedAt, p.UpdatedAt))
+                .ForMember(dest => dest.Interns, opt => opt.Ignore());
+
+            CreateMap<PagedResult<Project>, PagedProjectResponse>()
+                .ConstructUsing((PagedResult<Project> p) => new PagedProjectResponse(p.TotalCount, p.Data.Select(Mapping.Mapper.Map<ProjectResponse>).ToList()));
         }
     }
 }

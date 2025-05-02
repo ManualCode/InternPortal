@@ -2,9 +2,7 @@
 using InternPortal.Domain.Filters;
 using InternPortal.Domain.Models;
 using InternPortal.Infrastructure.Data;
-using InternPortal.Infrastructure.Entities;
 using InternPortal.Infrastructure.Extensions;
-using InternPortal.Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
 
 namespace InternPortal.Infrastructure.Repositories
@@ -13,7 +11,7 @@ namespace InternPortal.Infrastructure.Repositories
     {
         public async Task<Guid> AddAsync(Intern entity)
         {
-            await dbContext.Interns.AddAsync(Mapping.Mapper.Map<InternEntity>(entity));
+            await dbContext.Interns.AddAsync(entity);
             return entity.Id;
         }
 
@@ -29,18 +27,18 @@ namespace InternPortal.Infrastructure.Repositories
                 .AsNoTracking()
                 .ToListAsync();
 
-            return internEntities.Select(Mapping.Mapper.Map<Intern>).ToList();
+            return internEntities.ToList();
         }
 
         public async Task<Intern?> GetByIdAsync(Guid id)
         {
-            var internEntity = await dbContext.Interns
+            var intern = await dbContext.Interns
                 .Include(x => x.Project)
                 .Include(x => x.Internship)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Id == id);
 
-            return Mapping.Mapper.Map<Intern>(internEntity);
+            return intern;
         }
 
         public async Task<Guid> UpdateAsync(Guid id, Intern entity)
@@ -56,7 +54,7 @@ namespace InternPortal.Infrastructure.Repositories
             internEntity.BirthDate = entity.BirthDate;
             internEntity.InternshipId = entity.Internship.Id;
             internEntity.ProjectId = entity.Project.Id;
-            internEntity.UpdatedAt = DateTime.UtcNow;
+            internEntity.UpdateAt = DateTime.UtcNow;
 
             return id;
         }

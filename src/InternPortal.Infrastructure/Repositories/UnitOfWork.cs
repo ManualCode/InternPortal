@@ -27,7 +27,7 @@ namespace InternPortal.Infrastructure.Repositories
             get { return internshipRepository ??= new InternshipRepository(dbContext); }
         }
 
-        public async void Save()
+        public async Task Save()
            => await dbContext.SaveChangesAsync();
 
         private bool disposed = false;

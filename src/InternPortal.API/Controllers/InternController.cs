@@ -11,15 +11,11 @@ namespace InternPortal.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class InternController(IInternService internService,
-        IProjectSevice projectService, IInternshipService internshipService) : Controller
+    public class InternController(IInternService internService) : Controller
     {
         [HttpGet]
         public async Task<ActionResult<List<InternResponse>>> GetAll([FromQuery] InternFilter filter)
-        {
-            var interns = await internService.GetAllInterns(filter);
-            return Ok(interns.Select(Mapping.Mapper.Map<InternResponse>));
-        }
+            => Ok(await internService.GetAllInterns(filter));
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<InternResponse>> GetById(Guid id)
@@ -27,31 +23,22 @@ namespace InternPortal.API.Controllers
 
         [HttpPost]
         public async Task<ActionResult<Guid>> Create([FromBody] InternRequest request)
-        {
-            var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreateAt, request.UpdateAt));
-            var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreateAt, request.UpdateAt));
-            var intern = Intern.Create(request.FirstName, request.LastName, Enum.Parse<Gender>(request.Gender),
-                request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreateAt, request.UpdateAt);
-
-            return Ok(await internService.CreateIntern(intern));
-        }
+            => Ok(await internService.CreateIntern(request));
 
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<Guid>> Update(Guid id, [FromBody] InternRequest request)
         {
-            var internship = await internshipService.FindOrCreate(Internship.Create(request.Internship, [], request.CreateAt, request.UpdateAt));
-            var project = await projectService.FindOrCreate(Project.Create(request.Project, [], request.CreateAt, request.UpdateAt));
-            var intern = Intern.Create(request.FirstName, request.LastName, Enum.Parse<Gender>(request.Gender),
-                request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreateAt, request.UpdateAt);
 
-            return Ok(await internService.UpdateIntern(id, intern));
+            //var intern = Intern.Create(request.FirstName, request.LastName, Enum.Parse<Gender>(request.Gender),
+            //    request.Email, request.PhoneNumber, request.BirthDate, internship, project, request.CreateAt, request.UpdateAt);
+
+            return Ok(await internService.UpdateIntern(id, request));
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult<Guid>> Delete(Guid id)
         {
             await internService.DeleteIntern(id);
-
             return Ok(id);
         }
 

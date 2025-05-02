@@ -1,4 +1,4 @@
-﻿using InternPortal.Infrastructure.Entities;
+﻿using InternPortal.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -11,8 +11,8 @@ namespace InternPortal.Infrastructure.Data
 
         }
 
-        public DbSet<InternEntity> Interns { get; set; }
-        public DbSet<InternshipEntity> Internships { get; set; }
-        public DbSet<ProjectEntity> Projects { get; set; }
+        public DbSet<Intern> Interns { get; set; }
+        public DbSet<Internship> Internships { get; set; }
+        public DbSet<Project> Projects { get; set; }
     }
 }

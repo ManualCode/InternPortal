@@ -1,28 +1,22 @@
-﻿namespace InternPortal.Domain.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace InternPortal.Domain.Models
 {
     public class Internship
     {
-        private Internship(Guid id, string name, ICollection<Guid> internIds, DateTime createdAt, DateTime updatedAt)
-        {
-            Id = id;
-            Name = name;
-            InternIds = internIds;
-            CreatedAt = createdAt;
-            UpdatedAt = updatedAt;
-        }
+        [Key]
+        public Guid Id { get; set; }
 
-        public Guid Id { get; }
+        public string Name { get; set; } = string.Empty;
 
-        public string Name { get; }
+        [NotMapped]
+        public ICollection<Guid> InternIds { get; set; } = [];
 
-        public ICollection<Guid> InternIds { get; }
+        public ICollection<Intern> Interns { get; set; } = [];
 
-        public DateTime CreatedAt { get; }
+        public DateTime CreatedAt { get; set; }
 
-        public DateTime UpdatedAt { get; }
-
-
-        public static Internship Create(string name, ICollection<Guid> interns, DateTime createdAt, DateTime updatedAt, Guid? id = null)
-            => new Internship(id ?? Guid.NewGuid(), name, interns, createdAt, updatedAt);
+        public DateTime UpdatedAt { get; set; }
     }
 }
